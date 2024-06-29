@@ -1,0 +1,16 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    ":semanticPrefixFixDepsChoreOthers",
+    ":automergeRequireAllStatusChecks",
+    ":separateMultipleMajorReleases",
+    ":disableDependencyDashboard",
+    ":ignoreModulesAndTests",
+    ":automergeAll",
+    ":automergePr",
+    "group:monorepos",
+    "group:recommended",
+    "replacements:all",
+    "workarounds:all"
+  ]
+}
