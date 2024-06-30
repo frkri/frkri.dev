@@ -2,6 +2,10 @@
 	import '../app.css';
 </script>
 
+<svelte:head>
+	<title>Frkri</title>
+</svelte:head>
+
 <main>
 	<slot />
 </main>
