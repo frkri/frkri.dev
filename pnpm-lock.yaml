@@ -28,7 +28,7 @@ devDependencies:
     version: 2.41.0(eslint@9.6.0)(svelte@5.0.0-next.167)
   globals:
     specifier: ^15.0.0
-    version: 15.6.0
+    version: 15.7.0
   lucide-svelte:
     specifier: ^0.399.0
     version: 0.399.0(svelte@5.0.0-next.167)
@@ -1678,8 +1678,8 @@ packages:
     engines: {node: '>=18'}
     dev: true
 
-  /globals@15.6.0:
-    resolution: {integrity: sha512-UzcJi88Hw//CurUIRa9Jxb0vgOCcuD/MNjwmXp633cyaRKkCWACkoqHCtfZv43b1kqXGg/fpOa8bwgacCeXsVg==}
+  /globals@15.7.0:
+    resolution: {integrity: sha512-ivatRXWwKC6ImcdKO7dOwXuXR5XFrdwo45qFwD7D0qOkEPzzJdLXC3BHceBdyrPOD3p1suPaWi4Y4NMm2D++AQ==}
     engines: {node: '>=18'}
     dev: true
 
