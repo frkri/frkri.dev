@@ -21,9 +21,10 @@
 	div {
 		display: flex;
 		flex-direction: column;
-		min-height: 100dvh;
-
 		align-items: center;
+
+		margin: 0.4em;
+		min-height: 100dvh;
 	}
 
 	main {

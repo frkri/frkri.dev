@@ -60,10 +60,10 @@
 	}
 
 	section {
-		margin-bottom: 2rem;
+		margin-bottom: 3rem;
 
 		h2 {
-			font-size: 2rem;
+			font-size: 1.6rem;
 			margin-bottom: 1.2rem;
 		}
 
