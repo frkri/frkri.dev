@@ -33,10 +33,6 @@
 		transition: all 200ms ease-in-out;
 		text-decoration: none;
 
-		&:visited {
-			color: var(--link-visited);
-		}
-
 		&:hover,
 		&:focus {
 			color: var(--link-unvisited);
