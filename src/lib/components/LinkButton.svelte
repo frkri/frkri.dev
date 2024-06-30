@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { ArrowRight, ExternalLink } from 'lucide-svelte';
 
-	let { name, href = '/', outgoing = false } = $props();
+	let { name, href = '/', rel = '', outgoing = false } = $props();
 </script>
 
-<a {href} target={outgoing ? '_blank' : '_self'}
+<a {href} target={outgoing ? '_blank' : '_self'} {rel}
 	>{name}
 	<div id="icon">
 		{#if outgoing}

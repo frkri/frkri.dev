@@ -1,5 +1,5 @@
-<script>
-	import HelloHeader from '$lib/assets/HelloHeader.svelte';
+<script lang="ts">
+	import HelloHeader from '$lib/assets/media/HelloHeader.svelte';
 	import LinkButton from '$lib/components/LinkButton.svelte';
 </script>
 
@@ -38,7 +38,7 @@
 <section>
 	<h2>Other</h2>
 	<ul>
-		<li><LinkButton name="PGP Key" href="/key" /></li>
+		<li><LinkButton name="PGP Key" rel="pgpkey" href="/key" /></li>
 	</ul>
 </section>
 
