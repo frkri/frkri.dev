@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { version } from '$app/environment';
 	import '../app.css';
 	import '../global.css';
 </script>
@@ -7,14 +8,37 @@
 	<title>Frkri</title>
 </svelte:head>
 
-<main>
-	<slot />
-</main>
+<div>
+	<main>
+		<slot />
+	</main>
+	<footer>
+		<span id="hash">{version}</span>
+	</footer>
+</div>
 
 <style>
+	div {
+		display: flex;
+		flex-direction: column;
+		min-height: 100dvh;
+
+		align-items: center;
+	}
+
 	main {
+		flex: 1 0;
 		max-width: 1000px;
-		margin: 0 auto;
-		padding: 1.2em 0.4em;
+
+		padding: 1.2em 0.6em;
+	}
+
+	#hash {
+		font-size: 0.5em;
+		color: var(--text-quaternary);
+
+		&:hover {
+			color: var(--text-secondary);
+		}
 	}
 </style>

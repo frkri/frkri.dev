@@ -17,7 +17,10 @@ const config = {
 				experimentalJsonConfig: false,
 				persist: false
 			}
-		})
+		}),
+		version: {
+			name: process.env.CF_PAGES_COMMIT_SHA || 'dev'
+		}
 	}
 };
 
