@@ -1,0 +1,10 @@
+:root {
+	--background-primary: #1e1e1e;
+	--background-secondary: #323232;
+
+	--text-primary: #d0d0d0;
+	--text-secondary: #939393;
+
+	--link-unvisited: #59a9ff;
+	--link-visited: #346296;
+}
