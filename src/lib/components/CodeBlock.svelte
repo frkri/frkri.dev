@@ -5,12 +5,14 @@
 	let {
 		children,
 		content,
+		wrap,
 		filename,
-		download = false,
+		download,
 		copy = true
 	}: {
 		children: Snippet;
 		content: string;
+		wrap?: Boolean;
 		filename?: string;
 		download?: Boolean;
 		copy?: Boolean;
@@ -40,7 +42,7 @@
 			{/if}
 		</menu>
 	</div>
-	<pre>{@render children()}</pre>
+	<pre class:scroll={!wrap} class:wrap>{@render children()}</pre>
 </div>
 
 <style>
@@ -52,7 +54,7 @@
 		border-radius: 0.4rem;
 
 		max-width: 25rem;
-		width: 80dvw;
+		width: 90dvw;
 	}
 
 	#file {
@@ -114,10 +116,19 @@
 	pre {
 		margin: 0px;
 		padding: 1rem;
-		overflow-x: auto;
 
 		font-size: 0.7rem;
+		line-height: 1rem;
 		font-family: 'JetBrains Mono', monospace;
 		background-color: var(--background-secondary);
+	}
+
+	.wrap {
+		white-space: pre-wrap;
+		word-wrap: break-word;
+	}
+
+	.scroll {
+		overflow-x: auto;
 	}
 </style>
