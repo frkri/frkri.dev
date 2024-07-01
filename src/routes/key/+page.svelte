@@ -29,7 +29,7 @@
 
 		div {
 			max-height: 40ch;
-			overflow: auto;
+			overflow: scroll;
 
 			p {
 				text-align: center;

@@ -5,7 +5,7 @@
 	let {
 		children,
 		content,
-		filename = 'file.txt',
+		filename,
 		download = false,
 		copy = true
 	}: {
@@ -18,46 +18,76 @@
 </script>
 
 <div id="wrapper">
-	<menu>
-		{#if download}
-			<a href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`} download={filename}>
-				<Download size="1.5ch" />
-			</a>
+	<div id="file">
+		{#if filename}
+			<span>
+				{filename}
+			</span>
 		{/if}
-		{#if copy}
-			<button onclick={() => navigator.clipboard.writeText(content)}>
-				<Copy size="1.5ch" />
-			</button>
-		{/if}
-	</menu>
+		<menu>
+			{#if download}
+				<a
+					href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`}
+					download={filename}
+				>
+					<Download size="1.5ch" />
+				</a>
+			{/if}
+			{#if copy}
+				<button onclick={() => navigator.clipboard.writeText(content)}>
+					<Copy size="1.5ch" />
+				</button>
+			{/if}
+		</menu>
+	</div>
 	<pre>{@render children()}</pre>
 </div>
 
 <style>
 	#wrapper {
-		position: relative;
+		display: flex;
+		flex-direction: column;
 
 		margin: 0px;
-		padding: 0.8rem;
+		padding: 0.4rem;
 		border-radius: 0.4rem;
 
-		background-color: var(--background-secondary);
-		overflow: scroll;
 		max-width: 25rem;
 		width: 80dvw;
 	}
 
+	#file {
+		display: flex;
+		justify-content: end;
+		align-items: center;
+		height: 1.3rem;
+
+		span {
+			font-size: 0.8rem;
+			font-weight: 500;
+			height: 100%;
+
+			padding-right: 0.6rem;
+			padding-left: 0.6rem;
+		}
+
+		* {
+			background-color: var(--background-secondary);
+			padding: 0.2rem;
+
+			border-top-left-radius: 0.4rem;
+			border-top-right-radius: 0.4rem;
+		}
+	}
+
 	menu {
-		position: absolute;
-		top: 0.6rem;
-		right: 0.6rem;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
 
 		margin: 0px;
+		margin-left: auto;
 		gap: 0.2rem;
-
-		display: flex;
-		justify-content: center;
-		align-items: center;
 
 		& * {
 			display: flex;
@@ -76,7 +106,7 @@
 
 			&:hover,
 			&:focus {
-				background-color: var(--background-primary);
+				background-color: var(--background-primary) !important;
 				color: var(--text-primary);
 			}
 		}
@@ -84,9 +114,10 @@
 
 	pre {
 		margin: 0px;
-		padding: 0px;
+		padding: 1rem;
 
 		font-size: 0.7rem;
 		font-family: 'JetBrains Mono', monospace;
+		background-color: var(--background-secondary);
 	}
 </style>
