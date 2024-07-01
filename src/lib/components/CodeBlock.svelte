@@ -49,7 +49,6 @@
 		flex-direction: column;
 
 		margin: 0px;
-		padding: 0.4rem;
 		border-radius: 0.4rem;
 
 		max-width: 25rem;
@@ -115,6 +114,7 @@
 	pre {
 		margin: 0px;
 		padding: 1rem;
+		overflow-x: auto;
 
 		font-size: 0.7rem;
 		font-family: 'JetBrains Mono', monospace;

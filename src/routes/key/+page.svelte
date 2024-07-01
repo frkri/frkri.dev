@@ -27,13 +27,8 @@
 		align-items: center;
 		gap: 1rem;
 
-		div {
-			max-height: 40ch;
-			overflow: scroll;
-
-			p {
-				text-align: center;
-			}
+		p {
+			margin-bottom: 0px;
 		}
 	}
 </style>
