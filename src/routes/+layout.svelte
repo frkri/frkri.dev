@@ -2,6 +2,8 @@
 	import { version } from '$app/environment';
 	import '../app.css';
 	import '../global.css';
+
+	const repo = 'https://github.com/frkri/frkri.dev/commit/';
 </script>
 
 <svelte:head>
@@ -13,7 +15,7 @@
 		<slot />
 	</main>
 	<footer>
-		<span id="hash">{version}</span>
+		<a id="hash" href={repo + version}>{version}</a>
 	</footer>
 </div>
 
@@ -35,7 +37,8 @@
 	}
 
 	#hash {
-		font-size: 0.5em;
+		font-size: 0.4em;
+		text-decoration: none;
 		color: var(--text-quaternary);
 
 		&:hover {
