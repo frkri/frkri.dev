@@ -31,7 +31,7 @@
 		</li>
 		<li><LinkButton name="GitHub" outgoing={true} href="https://github.com/frkri" /></li>
 		<li><LinkButton name="GitLab" outgoing={true} href="https://gitlab.com/frkri" /></li>
-		<li><LinkButton name="Email" outgoing={true} href="mailto:" /></li>
+		<li><LinkButton name="Email" outgoing={true} href="/mail" /></li>
 	</ul>
 </section>
 
