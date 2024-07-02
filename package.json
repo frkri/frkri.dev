@@ -10,7 +10,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:format": "prettier --check .",
 		"check:lint": "eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"lint": "eslint . --fix"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-cloudflare": "^4.6.0",

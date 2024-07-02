@@ -12,10 +12,10 @@
 	}: {
 		children: Snippet;
 		content: string;
-		wrap?: Boolean;
+		wrap?: boolean;
 		filename?: string;
-		download?: Boolean;
-		copy?: Boolean;
+		download?: boolean;
+		copy?: boolean;
 	} = $props();
 </script>
 
