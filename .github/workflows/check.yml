@@ -1,0 +1,35 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_call:
+
+jobs:
+  check:
+    name: Format & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+            node-version-file: '.node-version'
+            cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check Svelte
+        run: pnpm run check
+
+      - name: Check Format
+        run: pnpm run check:format
+
+      - name: Check Lint
+        run: pnpm run check:lint
+
