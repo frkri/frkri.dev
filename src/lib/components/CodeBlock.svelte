@@ -70,6 +70,10 @@
 
 			padding-right: 0.6rem;
 			padding-left: 0.6rem;
+
+			@media screen and (max-width: 150px) {
+				display: none;
+			}
 		}
 
 		* {
@@ -115,9 +119,9 @@
 
 	pre {
 		margin: 0px;
-		padding: 1rem;
+		padding: 0.6rem;
 
-		font-size: 0.7rem;
+		font-size: 1ch;
 		line-height: 1rem;
 		font-family: 'JetBrains Mono', monospace;
 		background-color: var(--background-secondary);
