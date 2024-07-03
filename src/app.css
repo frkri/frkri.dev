@@ -11,3 +11,15 @@
 	--link-unvisited: #59a9ff;
 	--link-visited: #346296;
 }
+
+@font-face {
+	font-family: 'Inter';
+	display: swap;
+	src: url(/font/Inter.woff2) format('woff2');
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	display: swap;
+	src: url(/font/JetBrainsMono.woff2) format('woff2');
+}

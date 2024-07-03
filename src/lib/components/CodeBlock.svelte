@@ -123,7 +123,6 @@
 
 		font-size: 1ch;
 		line-height: 1rem;
-		font-family: 'JetBrains Mono', monospace;
 		background-color: var(--background-secondary);
 	}
 

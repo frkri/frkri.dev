@@ -9,13 +9,13 @@
 <section>
 	<h1>PGP Key</h1>
 	<div>
-		<CodeBlock filename="frkri.asc" download={true} content={key}>{key}</CodeBlock>
-	</div>
-	<div>
 		<p>Import the key with</p>
 		<CodeBlock content={cmd}>
 			<code>{cmd}</code>
 		</CodeBlock>
+	</div>
+	<div>
+		<CodeBlock filename="frkri.asc" download={true} content={key}>{key}</CodeBlock>
 	</div>
 </section>
 
@@ -25,10 +25,11 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		gap: 1rem;
+		gap: 2rem;
 
 		p {
-			margin-bottom: 0px;
+			font-size: 0.8rem;
+			margin-bottom: 0.2rem;
 		}
 	}
 </style>

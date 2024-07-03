@@ -25,6 +25,7 @@
 		color: var(--link-unvisited);
 		background-color: #213c5925;
 		font-size: 1.4rem;
+		font-weight: 600;
 
 		padding: 0.3em;
 		border-radius: 12px;
