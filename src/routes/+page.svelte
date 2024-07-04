@@ -14,7 +14,12 @@
 	<h2>Some Stuff</h2>
 	<ul>
 		<li><LinkButton name="ModelRunner" href="https://github.com/frkri/ModelRunner" /></li>
-		<li><LinkButton name="Nook" href="https://nook.frkri.dev/" /></li>
+		<li>
+			<LinkButton
+				name="Nook"
+				href="https://nook.frkri.dev?import=https://raw.githubusercontent.com/frkri/Nook/master/examples/NookGuide.json"
+			/>
+		</li>
 	</ul>
 </section>
 
