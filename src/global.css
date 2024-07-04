@@ -1,8 +1,18 @@
-html {
+body {
 	font-family: 'Inter', sans-serif;
+	line-height: 1.5;
+
+	max-width: 1500px;
+	margin: 0px auto;
 
 	color: var(--text-primary);
 	background-color: var(--background-primary);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
 }
 
 pre,
