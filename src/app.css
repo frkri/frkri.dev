@@ -15,9 +15,9 @@
 }
 
 @font-face {
-	font-family: 'Inter';
+	font-family: 'Geist';
 	display: swap;
-	src: url(/font/Inter.woff2) format('woff2');
+	src: url(/font/Geist.woff2) format('woff2');
 }
 
 @font-face {
