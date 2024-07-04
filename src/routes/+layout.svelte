@@ -13,7 +13,7 @@
 <main>
 	<slot />
 </main>
-<a href={repo} aria-hidden="true">{version}</a>
+<a href={repo} tabindex="-1" aria-hidden="true">{version}</a>
 
 <style>
 	main {
