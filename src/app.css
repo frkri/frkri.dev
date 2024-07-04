@@ -16,12 +16,12 @@
 
 @font-face {
 	font-family: 'Geist';
-	display: swap;
+	font-display: swap;
 	src: url(/font/Geist.woff2) format('woff2');
 }
 
 @font-face {
 	font-family: 'JetBrains Mono';
-	display: swap;
+	font-display: swap;
 	src: url(/font/JetBrainsMono.woff2) format('woff2');
 }
