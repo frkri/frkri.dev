@@ -3,41 +3,29 @@
 	import '../app.css';
 	import '../global.css';
 
-	const repo = 'https://github.com/frkri/frkri.dev/commit/';
+	const repo = 'https://github.com/frkri/frkri.dev/commit/' + version;
 </script>
 
 <svelte:head>
 	<title>Frkri</title>
 </svelte:head>
 
-<div>
-	<main>
-		<slot />
-	</main>
-	<footer>
-		<a id="hash" href={repo + version}>{version}</a>
-	</footer>
-</div>
+<main>
+	<slot />
+</main>
+<a href={repo} aria-hidden="true">{version}</a>
 
 <style>
-	div {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-
-		margin: 0.4em;
-		min-height: 100dvh;
-	}
-
 	main {
-		flex: 1 0;
-		max-width: 1000px;
-
-		padding: 1.2em 0.6em;
+		margin: 2.5em 0.8em;
 	}
 
-	#hash {
-		font-size: 0.4em;
+	a {
+		position: fixed;
+		bottom: 0.5em;
+		left: 0.5em;
+
+		font-size: 0.3em;
 		text-decoration: none;
 		color: var(--text-quaternary);
 

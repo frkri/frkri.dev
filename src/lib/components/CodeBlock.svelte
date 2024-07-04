@@ -1,88 +1,43 @@
 <script lang="ts">
-	import { Copy, Download } from 'lucide-svelte';
+	import { Copy } from 'lucide-svelte';
 	import type { Snippet } from 'svelte';
 
 	let {
 		children,
 		content,
-		wrap,
-		filename,
-		download,
-		copy = true
+		download = true,
+		title
 	}: {
 		children: Snippet;
 		content: string;
-		wrap?: boolean;
-		filename?: string;
+		title?: string;
 		download?: boolean;
-		copy?: boolean;
 	} = $props();
 </script>
 
-<div id="wrapper">
-	<div id="file">
-		{#if filename}
-			<span>
-				{filename}
-			</span>
+<div>
+	<menu>
+		{#if download}
+			<a href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`} download={title}>
+				{title}
+			</a>
+		{:else}
+			<span>{title}</span>
 		{/if}
-		<menu>
-			{#if download}
-				<a
-					href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`}
-					download={filename}
-				>
-					<Download size="1.5ch" />
-				</a>
-			{/if}
-			{#if copy}
-				<button onclick={() => navigator.clipboard.writeText(content)}>
-					<Copy size="1.5ch" />
-				</button>
-			{/if}
-		</menu>
-	</div>
-	<pre class:scroll={!wrap} class:wrap>{@render children()}</pre>
+		<button onclick={() => navigator.clipboard.writeText(content)}>
+			<Copy size="1.5ch" />
+		</button>
+	</menu>
+	<pre>{@render children()}</pre>
 </div>
 
 <style>
-	#wrapper {
-		display: flex;
-		flex-direction: column;
-
+	div {
 		margin: 0px;
 		border-radius: 0.4rem;
+		max-width: calc(100vw - 1.6rem);
 
-		max-width: 25rem;
-		width: 90dvw;
-	}
-
-	#file {
-		display: flex;
-		justify-content: end;
-		align-items: center;
-		height: 1.3rem;
-
-		span {
-			font-size: 0.8rem;
-			font-weight: 500;
-			height: 100%;
-
-			padding-right: 0.6rem;
-			padding-left: 0.6rem;
-
-			@media screen and (max-width: 150px) {
-				display: none;
-			}
-		}
-
-		* {
-			background-color: var(--background-secondary);
-			padding: 0.2rem;
-
-			border-top-left-radius: 0.4rem;
-			border-top-right-radius: 0.4rem;
-		}
+		background-color: var(--background-secondary);
 	}
 
 	menu {
@@ -91,47 +46,50 @@
 		align-items: center;
 
 		margin: 0px;
-		margin-left: auto;
-		gap: 0.2rem;
+		padding: 0.2rem;
 
 		& * {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
 			padding: 0.3rem;
 			border-radius: 0.4rem;
 			border-width: 0px;
 
+			font-size: 1.2ch;
+			font-weight: 600;
+			text-decoration: none;
+
 			background-color: var(--background-secondary);
 			color: var(--text-secondary);
+		}
 
+		& a,
+		& button {
 			transition: 150ms ease-in-out;
 			cursor: pointer;
 
 			&:hover,
 			&:focus {
-				background-color: var(--background-primary) !important;
+				background-color: var(--background-primary);
 				color: var(--text-primary);
 			}
+		}
+
+		& button {
+			display: grid;
+			place-items: center;
+
+			margin-left: auto;
 		}
 	}
 
 	pre {
 		margin: 0px;
 		padding: 0.6rem;
+		padding-top: 0px;
 
 		font-size: 1ch;
 		line-height: 1rem;
 		background-color: var(--background-secondary);
-	}
 
-	.wrap {
-		white-space: pre-wrap;
-		word-wrap: break-word;
-	}
-
-	.scroll {
 		overflow-x: auto;
 	}
 </style>
