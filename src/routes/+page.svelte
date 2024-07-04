@@ -13,8 +13,8 @@
 <section>
 	<h2>Some Stuff</h2>
 	<ul>
-		<li><LinkButton name="A" href="/" /></li>
-		<li><LinkButton name="B" href="/" /></li>
+		<li><LinkButton name="ModelRunner" href="https://github.com/frkri/ModelRunner" /></li>
+		<li><LinkButton name="Nook" href="https://nook.frkri.dev/" /></li>
 	</ul>
 </section>
 
