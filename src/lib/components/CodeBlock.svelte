@@ -63,7 +63,8 @@
 
 		& a,
 		& button {
-			transition: 150ms ease-in-out;
+			transition-property: background-color, color;
+			transition-duration: 150ms;
 			cursor: pointer;
 
 			&:hover,
