@@ -13,6 +13,10 @@ body {
 *::before,
 *::after {
 	box-sizing: border-box;
+
+	&::selection {
+		background-color: var(--selection);
+	}
 }
 
 pre,

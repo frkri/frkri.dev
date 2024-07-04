@@ -10,6 +10,8 @@
 
 	--link-unvisited: #59a9ff;
 	--link-visited: #346296;
+
+	--selection: #e3994580;
 }
 
 @font-face {
