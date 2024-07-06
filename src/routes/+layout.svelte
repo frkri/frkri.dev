@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { version } from '$app/environment';
-	import DoodleToolBar from '$lib/components/doodle/DoodleTools.svelte';
+	import DoodleToolBar from '$lib/components/doodle/ToolBar.svelte';
 	import '../app.css';
 	import '../global.css';
 
