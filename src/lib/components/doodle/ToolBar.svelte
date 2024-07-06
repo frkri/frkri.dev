@@ -28,20 +28,20 @@
 				mode = CanvasMode.DRAW;
 			}}
 		>
-			<Pencil size="3.5ch" absoluteStrokeWidth={true} />
+			<Pencil size="30px" absoluteStrokeWidth={true} />
 		</button>
 	{:else}
-		<div class="selected color-wrap">
-			<input type="color" bind:value={color} />
-		</div>
+		<label class="selected color-wrap">
+			<input type="color" title="Pencil color" bind:value={color} />
+		</label>
 	{/if}
 	{#if isOpen}
 		<button class:selected={mode === CanvasMode.ERASE} onclick={() => (mode = CanvasMode.ERASE)}>
-			<Eraser size="3.5ch" absoluteStrokeWidth={true} />
+			<Eraser size="30px" absoluteStrokeWidth={true} />
 		</button>
-		<button><Undo2 size="3.5ch" absoluteStrokeWidth={true} /></button>
+		<button><Undo2 size="30px" absoluteStrokeWidth={true} /></button>
 		<button onclick={close}>
-			<X size="3.5ch" absoluteStrokeWidth={true} />
+			<X size="30px" absoluteStrokeWidth={true} />
 		</button>
 	{/if}
 </menu>
@@ -62,7 +62,6 @@
 		align-items: center;
 		z-index: 2;
 
-		max-width: fit-content;
 		position: fixed;
 		bottom: 0.8em;
 		right: 0.8em;
@@ -82,15 +81,14 @@
 			align-items: center;
 			justify-content: center;
 
+			border: none;
+			padding: 0.4rem;
+
 			transition-property: all;
 			transition: 150ms ease-in-out;
-
-			border: none;
 		}
 
 		& button {
-			padding: 0.4rem;
-
 			color: var(--text-secondary);
 			background-color: var(--background-primary);
 
@@ -111,15 +109,18 @@
 	}
 
 	.color-wrap {
-		& input {
-			height: 3.5ch;
-			width: 3.5ch;
+		max-width: 42.8px;
+		max-height: 42.8px;
 
-			margin: 0.4rem;
+		& input {
+			min-height: 30px;
+			min-width: 30px;
+
+			margin: 0px;
 			padding: 0px;
 
 			opacity: 0.8;
-			clip-path: circle(45%);
+			clip-path: circle(30%);
 
 			&:hover {
 				opacity: 1;

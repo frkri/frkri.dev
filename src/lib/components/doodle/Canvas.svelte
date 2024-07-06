@@ -5,10 +5,19 @@
 		mode = $bindable(CanvasMode.IDLE),
 		color = $bindable('#FFFFFF')
 	}: { mode: CanvasMode; color: string } = $props();
+
+	let cursor = $derived.by(() => {
+		switch (mode) {
+			case CanvasMode.DRAW:
+				return 'crosshair';
+			default:
+				return 'default';
+		}
+	});
 </script>
 
 {#if mode !== CanvasMode.IDLE}
-	<canvas></canvas>
+	<canvas style="cursor: {cursor};"></canvas>
 {/if}
 
 <style>

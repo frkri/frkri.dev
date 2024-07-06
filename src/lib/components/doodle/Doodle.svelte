@@ -3,10 +3,6 @@
 	import Canvas from './Canvas.svelte';
 	import ToolBar from './ToolBar.svelte';
 
-	let doodleState = $state({
-		mode: CanvasMode.IDLE,
-		color: '#FFFFFF'
-	});
 	let mode = $state(CanvasMode.IDLE);
 	let color = $state('#FFFFFF');
 </script>
