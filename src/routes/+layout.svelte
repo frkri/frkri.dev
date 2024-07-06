@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { version } from '$app/environment';
 	import DoodleToolBar from '$lib/components/doodle/ToolBar.svelte';
+	import Window from '$lib/components/doodle/Doodle.svelte';
+	import Doodle from '$lib/components/doodle/Doodle.svelte';
 	import '../app.css';
 	import '../global.css';
 
@@ -14,7 +16,7 @@
 <main>
 	<slot />
 </main>
-<DoodleToolBar />
+<Doodle />
 <a href={repo} tabindex="-1" aria-hidden="true">{version}</a>
 
 <style>
