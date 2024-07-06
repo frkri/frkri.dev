@@ -1,13 +1,26 @@
 <script lang="ts">
 	import { CanvasMode } from '$lib/types/doodle';
+
 	const MAX_RADIUS = 10;
 	const DEFAULT_RADIUS = MAX_RADIUS / 2;
 	const MIN_RADIUS = 1;
 
+	let canvas: HTMLCanvasElement;
+	let ctx: CanvasRenderingContext2D;
 	let {
 		mode = $bindable(CanvasMode.IDLE),
 		color = $bindable('#FFFFFF')
 	}: { mode: CanvasMode; color: string } = $props();
+
+	$effect(() => {
+		let context = canvas.getContext('2d');
+		if (context) ctx = context;
+
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		ctx.fillStyle = color;
+	});
 
 	let cursorRadius = $state(DEFAULT_RADIUS);
 	let cursorStyle = $derived.by(() => {
@@ -32,12 +45,26 @@
 				break;
 		}
 	}
+
+	function handleMouseMove(e: MouseEvent) {
+		if (e.buttons !== 1 || mode === CanvasMode.IDLE) return;
+
+		if (mode === CanvasMode.DRAW) {
+			console.log('draw');
+		} else if (mode === CanvasMode.ERASE) {
+			console.log('erase');
+		}
+	}
 </script>
 
-<svelte:window on:keydown={handleKey} />
-{#if mode !== CanvasMode.IDLE}
-	<canvas style="cursor: {cursorStyle};"></canvas>
-{/if}
+<svelte:window onkeydown={handleKey} />
+<canvas
+	bind:this={canvas}
+	onmousemove={handleMouseMove}
+	class:none={mode === CanvasMode.IDLE}
+	style="cursor: {cursorStyle};"
+>
+</canvas>
 
 <style>
 	canvas {
@@ -49,5 +76,10 @@
 		height: 100%;
 
 		z-index: 1;
+	}
+
+	.none {
+		opacity: 0.4;
+		z-index: -1;
 	}
 </style>
