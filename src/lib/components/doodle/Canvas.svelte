@@ -1,54 +1,62 @@
 <script lang="ts">
 	import { CanvasMode } from '$lib/types/doodle';
+	const PENCIL_MAX_RADIUS = 10;
+	const PENCIL_MIN_RADIUS = 1;
+	const PENCIL_DEFAULT_RADIUS = PENCIL_MAX_RADIUS / 2;
 
-	const MAX_RADIUS = 10;
-	const DEFAULT_RADIUS = MAX_RADIUS / 2;
-	const MIN_RADIUS = 1;
+	const DOTS_SIZE = 3;
+	const DOTS_SHOW_RADIUS = 500;
 
 	let canvas: HTMLCanvasElement;
-	let ctx: CanvasRenderingContext2D;
-	let {
-		mode = $bindable(CanvasMode.IDLE),
-		color = $bindable('#FFFFFF')
-	}: { mode: CanvasMode; color: string } = $props();
+	let dots: HTMLDivElement;
+	let ctx: OffscreenCanvasRenderingContext2D;
+
+	let { mode = $bindable(), color = $bindable() }: { mode: CanvasMode; color: string } = $props();
+	let pencilRadius = $state(PENCIL_DEFAULT_RADIUS);
+	let pencilStyle = $derived.by(() => {
+		if (mode === CanvasMode.DRAW || mode === CanvasMode.ERASE)
+			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 2}' height='${PENCIL_MAX_RADIUS * 2}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFFAA'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 2) / 2}' cy='${(PENCIL_MAX_RADIUS * 2) / 2}' r='${pencilRadius}'></circle></svg>"), auto`;
+		return 'default';
+	});
 
 	$effect(() => {
-		let context = canvas.getContext('2d');
-		if (context) ctx = context;
+		let context = canvas.transferControlToOffscreen().getContext('2d');
+		if (!context) {
+			console.warn('Failed to get canvas context ):');
+			return;
+		}
 
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-
+		ctx = context;
 		ctx.fillStyle = color;
 	});
 
-	let cursorRadius = $state(DEFAULT_RADIUS);
-	let cursorStyle = $derived.by(() => {
-		if (mode === CanvasMode.DRAW) {
-			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${MAX_RADIUS * 2}' height='${MAX_RADIUS * 2}' fill='${color.replace('#', '%23')}AA'><circle cx='${(MAX_RADIUS * 2) / 2}' cy='${(MAX_RADIUS * 2) / 2}' r='${cursorRadius}'></circle></svg>") 16 16, auto`;
-		} else {
-			return 'default';
-		}
-	});
-
 	function handleKey(e: KeyboardEvent) {
-		if (e.ctrlKey) return;
+		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
 		switch (e.key) {
 			case '+':
-				cursorRadius = Math.min(cursorRadius + 1, MAX_RADIUS);
+				pencilRadius = Math.min(pencilRadius + 1, PENCIL_MAX_RADIUS);
 				break;
 			case '-':
-				cursorRadius = Math.max(cursorRadius - 1, MIN_RADIUS);
+				pencilRadius = Math.max(pencilRadius - 1, PENCIL_MIN_RADIUS);
 				break;
 			case '=':
-				cursorRadius = DEFAULT_RADIUS;
+				pencilRadius = PENCIL_DEFAULT_RADIUS;
 				break;
 		}
 	}
 
 	function handleMouseMove(e: MouseEvent) {
-		if (e.buttons !== 1 || mode === CanvasMode.IDLE) return;
+		if (mode === CanvasMode.IDLE) return;
+		const x = e.clientX;
+		const y = e.clientY;
 
+		// Create a radial gradient mask that only shows the dots near the cursor position
+		dots.style.background = `radial-gradient(circle ${DOTS_SHOW_RADIUS}px at ${x}px ${y}px, transparent 0%, var(--background-primary)),
+		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF44"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>')
+		center center`;
+
+		// Check if right mouse button is pressed
+		if (e.buttons !== 1) return;
 		if (mode === CanvasMode.DRAW) {
 			console.log('draw');
 		} else if (mode === CanvasMode.ERASE) {
@@ -58,13 +66,10 @@
 </script>
 
 <svelte:window onkeydown={handleKey} />
-<canvas
-	bind:this={canvas}
-	onmousemove={handleMouseMove}
-	class:none={mode === CanvasMode.IDLE}
-	style="cursor: {cursorStyle};"
->
-</canvas>
+<div class:hidden={mode === CanvasMode.IDLE}>
+	<canvas bind:this={canvas} onmousemove={handleMouseMove} style="cursor: {pencilStyle};"> </canvas>
+	<div id="dots" bind:this={dots} aria-hidden="true"></div>
+</div>
 
 <style>
 	canvas {
@@ -76,10 +81,27 @@
 		height: 100%;
 
 		z-index: 1;
+		opacity: 1;
+		pointer-events: all;
 	}
 
-	.none {
+	#dots {
+		position: fixed;
+		top: 0;
+		left: 0;
+
+		width: 100%;
+		height: 100%;
+
+		z-index: -5;
+		pointer-events: none;
+	}
+
+	.hidden * {
+		z-index: -5;
 		opacity: 0.4;
-		z-index: -1;
+
+		pointer-events: none;
+		background: none !important;
 	}
 </style>

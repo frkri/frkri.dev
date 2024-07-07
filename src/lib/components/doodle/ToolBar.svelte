@@ -4,7 +4,7 @@
 
 	let {
 		isOpen,
-		mode = $bindable(CanvasMode.IDLE),
+		mode = $bindable(),
 		color = $bindable()
 	}: { isOpen?: boolean; mode: CanvasMode; color: string } = $props();
 
