@@ -25,13 +25,14 @@
 		bottom: 0.2em;
 		left: 0.2em;
 
+		opacity: 0;
 		font-size: 0.2em;
-		opacity: 0.2;
+
 		color: var(--text-quaternary);
 		text-decoration: none;
 
 		&:hover {
-			opacity: 0.8;
+			opacity: 0.5;
 			color: var(--text-secondary);
 		}
 	}
