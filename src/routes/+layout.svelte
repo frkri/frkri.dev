@@ -22,14 +22,16 @@
 
 	a {
 		position: fixed;
-		bottom: 0.5em;
-		left: 0.5em;
+		bottom: 0.2em;
+		left: 0.2em;
 
-		font-size: 0.3em;
-		text-decoration: none;
+		font-size: 0.2em;
+		opacity: 0.2;
 		color: var(--text-quaternary);
+		text-decoration: none;
 
 		&:hover {
+			opacity: 0.8;
 			color: var(--text-secondary);
 		}
 	}
