@@ -39,7 +39,6 @@
 		<button class:selected={mode === CanvasMode.ERASE} onclick={() => (mode = CanvasMode.ERASE)}>
 			<Eraser size="30px" absoluteStrokeWidth={true} />
 		</button>
-		<button><Undo2 size="30px" absoluteStrokeWidth={true} /></button>
 		<button onclick={close}>
 			<X size="30px" absoluteStrokeWidth={true} />
 		</button>
