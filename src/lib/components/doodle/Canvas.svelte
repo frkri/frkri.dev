@@ -24,16 +24,18 @@
 	let points: number[][] = $state([]);
 
 	$effect(() => {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		const dpr = window.devicePixelRatio;
+		canvas.width = window.innerWidth * dpr;
+		canvas.height = window.innerHeight * dpr;
 
-		let context = canvas.getContext('2d');
+		const context = canvas.getContext('2d');
 		if (!context) {
 			console.warn('Failed to get canvas context ):');
 			return;
 		}
 
 		ctx = context;
+		ctx.scale(dpr, dpr);
 	});
 
 	function handleKey(e: KeyboardEvent) {
@@ -62,10 +64,24 @@
 	}
 
 	function handleMouseDown(e: MouseEvent) {
+		console.log('Mouse down', e.buttons);
+		act(e.buttons === 1, e.pageX, e.pageY);
+	}
+
+	function handleTouchEnd(e: TouchEvent) {
+		act(false, 0, 0);
+	}
+
+	function handleTouchMove(e: TouchEvent) {
+		let first = e.touches[0];
+		act(true, first.pageX, first.pageY);
+	}
+
+	function act(isDrawing: boolean, x: number, y: number) {
 		if (mode === CanvasMode.IDLE) return;
 
 		// Clear the current points if the mouse button is released
-		if (e.buttons !== 1) {
+		if (!isDrawing) {
 			if (points.length > 0) points = [];
 			return;
 		}
@@ -75,7 +91,7 @@
 
 		// Draw or erase the canvas based on the mouse position
 		if (mode === CanvasMode.DRAW) {
-			points.push([e.pageX, e.pageY]);
+			points.push([x, y]);
 			const stroke = getStroke(points, {
 				size: pencilRadius * 1.2,
 				thinning: 0.8,
@@ -99,7 +115,7 @@
 			ctx.globalCompositeOperation = 'destination-out';
 
 			ctx.beginPath();
-			ctx.arc(e.pageX, e.pageY, pencilRadius, 0, 2 * Math.PI);
+			ctx.arc(x, y, pencilRadius, 0, 2 * Math.PI);
 			ctx.fill();
 
 			ctx.globalCompositeOperation = 'source-over';
@@ -111,6 +127,8 @@
 <div class:hidden={mode === CanvasMode.IDLE}>
 	<canvas
 		bind:this={canvas}
+		ontouchmove={handleTouchMove}
+		ontouchend={handleTouchEnd}
 		onmousemove={handleMouseMove}
 		onmousedown={handleMouseDown}
 		style="cursor: {pencilStyle};"

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eraser, Pencil, Undo2, X } from 'lucide-svelte';
+	import { Eraser, Pencil, X } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
 
 	let {
