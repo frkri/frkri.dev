@@ -26,17 +26,13 @@
 <section>
 	<h2>Contact me</h2>
 	<ul>
-		<li><LinkButton name="KeyBase" outgoing={true} href="https://keybase.io/frkri" /></li>
+		<li><LinkButton name="KeyBase" href="https://keybase.io/frkri" /></li>
 		<li>
-			<LinkButton
-				name="Discord"
-				outgoing={true}
-				href="https://discord.com/users/192707706434486273"
-			/>
+			<LinkButton name="Discord" href="https://discord.com/users/192707706434486273" />
 		</li>
-		<li><LinkButton name="GitHub" outgoing={true} href="https://github.com/frkri" /></li>
-		<li><LinkButton name="GitLab" outgoing={true} href="https://gitlab.com/frkri" /></li>
-		<li><LinkButton name="Email" outgoing={true} href="/mail" /></li>
+		<li><LinkButton name="GitHub" href="https://github.com/frkri" /></li>
+		<li><LinkButton name="GitLab" href="https://gitlab.com/frkri" /></li>
+		<li><LinkButton name="Email" href="/mail" /></li>
 	</ul>
 </section>
 

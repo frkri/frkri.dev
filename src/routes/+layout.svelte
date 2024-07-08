@@ -24,14 +24,17 @@
 
 	a {
 		position: fixed;
-		bottom: 0.5em;
-		left: 0.5em;
+		bottom: 0.2em;
+		left: 0.2em;
 
-		font-size: 0.3em;
-		text-decoration: none;
+		opacity: 0;
+		font-size: 0.2em;
+
 		color: var(--text-quaternary);
+		text-decoration: none;
 
 		&:hover {
+			opacity: 0.5;
 			color: var(--text-secondary);
 		}
 	}
