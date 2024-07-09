@@ -2,7 +2,6 @@
 	import { CanvasMode } from '$lib/types/doodle';
 	import { getStroke } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
-
 	const PENCIL_MAX_RADIUS = 20;
 	const PENCIL_MIN_RADIUS = 1;
 	const PENCIL_DEFAULT_RADIUS = PENCIL_MAX_RADIUS / 2;
@@ -21,13 +20,9 @@
 			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 2}' height='${PENCIL_MAX_RADIUS * 2}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFFAA'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 2) / 2}' cy='${(PENCIL_MAX_RADIUS * 2) / 2}' r='${pencilRadius}'></circle></svg>") 16 16, auto`;
 		return 'default';
 	});
-	let points: number[][] = $state([]);
+	let points: number[][] = [];
 
 	$effect(() => {
-		const dpr = window.devicePixelRatio;
-		canvas.width = window.innerWidth * dpr;
-		canvas.height = window.innerHeight * dpr;
-
 		const context = canvas.getContext('2d');
 		if (!context) {
 			console.warn('Failed to get canvas context ):');
@@ -35,8 +30,21 @@
 		}
 
 		ctx = context;
-		ctx.scale(dpr, dpr);
+		handleResize();
 	});
+
+	function handleResize() {
+		const dpr = window.devicePixelRatio;
+		canvas.width = window.innerWidth * dpr;
+		canvas.height = document.body.scrollHeight + window.scrollY * dpr;
+
+		// todo check for scroll position
+-
+		canvas.style.width = `${window.innerWidth}px`;
+		canvas.style.height = `${document.body.scrollHeight}px`;
+
+		ctx.scale(dpr, dpr);
+	}
 
 	function handleKey(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
@@ -64,7 +72,6 @@
 	}
 
 	function handleMouseDown(e: MouseEvent) {
-		console.log('Mouse down', e.buttons);
 		act(e.buttons === 1, e.pageX, e.pageY);
 	}
 
@@ -86,16 +93,13 @@
 			return;
 		}
 
-		// Limit the number of points to prevent performance issues
-		if (points.length > 2000) points = points.slice(1000);
-
 		// Draw or erase the canvas based on the mouse position
 		if (mode === CanvasMode.DRAW) {
 			points.push([x, y]);
 			const stroke = getStroke(points, {
-				size: pencilRadius * 1.2,
-				thinning: 0.8,
-				smoothing: 0.8,
+				size: pencilRadius * 1.8,
+				thinning: 0.5,
+				smoothing: 1,
 				streamline: 0.8,
 				simulatePressure: true,
 				start: {
@@ -123,7 +127,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKey} />
+<svelte:window onkeydown={handleKey} onresize={handleResize} />
 <div class:hidden={mode === CanvasMode.IDLE}>
 	<canvas
 		bind:this={canvas}
@@ -139,12 +143,9 @@
 
 <style>
 	canvas {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
-
-		width: 100%;
-		height: 100%;
 
 		transition: all 150ms ease-in-out;
 		z-index: 1;
