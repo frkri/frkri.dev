@@ -34,14 +34,13 @@
 	});
 
 	function handleResize() {
+		// todo scroll height
 		const dpr = window.devicePixelRatio;
 		canvas.width = window.innerWidth * dpr;
-		canvas.height = document.body.scrollHeight + window.scrollY * dpr;
+		canvas.height = window.innerHeight * dpr;
 
-		// todo check for scroll position
--
 		canvas.style.width = `${window.innerWidth}px`;
-		canvas.style.height = `${document.body.scrollHeight}px`;
+		canvas.style.height = `${window.innerHeight}px`;
 
 		ctx.scale(dpr, dpr);
 	}
@@ -75,7 +74,7 @@
 		act(e.buttons === 1, e.pageX, e.pageY);
 	}
 
-	function handleTouchEnd(e: TouchEvent) {
+	function handleTouchEnd() {
 		act(false, 0, 0);
 	}
 
