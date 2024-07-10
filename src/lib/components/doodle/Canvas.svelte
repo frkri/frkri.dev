@@ -35,10 +35,12 @@
 
 	function handleResize() {
 		// todo scroll height
+		// todo requestAnimationFrame on canvas redraw
 		const dpr = window.devicePixelRatio;
 		canvas.width = window.innerWidth * dpr;
 		canvas.height = window.innerHeight * dpr;
 
+		// does nothing?
 		canvas.style.width = `${window.innerWidth}px`;
 		canvas.style.height = `${window.innerHeight}px`;
 
@@ -64,18 +66,11 @@
 		if (mode === CanvasMode.IDLE) return;
 
 		updateDotsGrid(e.pageX, e.pageY);
-		handleMouseDown(e);
-	}
-
-	function handleMouseDown(e: MouseEvent) {
 		updateCanvas(e.buttons === 1, e.pageX, e.pageY);
 	}
 
-	function handleTouchEnd() {
-		updateCanvas(false, 0, 0);
-	}
-
 	function handleTouchMove(e: TouchEvent) {
+		if (mode === CanvasMode.IDLE) return;
 		let first = e.touches[0];
 
 		updateDotsGrid(first.pageX, first.pageY);
@@ -136,9 +131,9 @@
 	<canvas
 		bind:this={canvas}
 		ontouchmove={handleTouchMove}
-		ontouchend={handleTouchEnd}
 		onmousemove={handleMouseMove}
-		onmousedown={handleMouseDown}
+		ontouchend={() => updateCanvas(false, 0, 0)}
+		onmousedown={(e) => updateCanvas(e.buttons === 1, e.pageX, e.pageY)}
 		style="cursor: {pencilStyle};"
 	>
 	</canvas>
@@ -150,6 +145,8 @@
 		position: absolute;
 		top: 0;
 		left: 0;
+
+		max-width: 100%;
 
 		transition: all 150ms ease-in-out;
 		z-index: 1;
