@@ -63,27 +63,32 @@
 	function handleMouseMove(e: MouseEvent) {
 		if (mode === CanvasMode.IDLE) return;
 
-		// Create a radial gradient mask that only shows the dots near the cursor position
-		dots.style.background = `radial-gradient(circle ${DOTS_SHOW_RADIUS}px at ${e.pageX}px ${e.pageY}px, transparent 0%, var(--background-primary)),
-		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF44"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>') center center`;
-
+		updateDotsGrid(e.pageX, e.pageY);
 		handleMouseDown(e);
 	}
 
 	function handleMouseDown(e: MouseEvent) {
-		act(e.buttons === 1, e.pageX, e.pageY);
+		updateCanvas(e.buttons === 1, e.pageX, e.pageY);
 	}
 
 	function handleTouchEnd() {
-		act(false, 0, 0);
+		updateCanvas(false, 0, 0);
 	}
 
 	function handleTouchMove(e: TouchEvent) {
 		let first = e.touches[0];
-		act(true, first.pageX, first.pageY);
+
+		updateDotsGrid(first.pageX, first.pageY);
+		updateCanvas(true, first.pageX, first.pageY);
 	}
 
-	function act(isDrawing: boolean, x: number, y: number) {
+	function updateDotsGrid(x: number, y: number) {
+		// Create a radial gradient mask that only shows the dots near the cursor position
+		dots.style.background = `radial-gradient(circle ${DOTS_SHOW_RADIUS}px at ${x}px ${y}px, transparent 0%, var(--background-primary)),
+		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF44"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>') center center`;
+	}
+
+	function updateCanvas(isDrawing: boolean, x: number, y: number) {
 		if (mode === CanvasMode.IDLE) return;
 
 		// Clear the current points if the mouse button is released
