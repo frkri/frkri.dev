@@ -66,19 +66,15 @@
 		}
 	}
 
-	function handleMouseMove(e: MouseEvent) {
-		if (mode === CanvasMode.IDLE) return;
-
+	function handlePointer(e: PointerEvent) {
 		updateDotsGrid(e.pageX, e.pageY);
-		updateCanvas(e.buttons === 1, e.pageX, e.pageY);
+
+		if (e.buttons !== 1) return;
+		updateCanvas(e.pageX, e.pageY, e.pressure);
 	}
 
-	function handleTouchMove(e: TouchEvent) {
-		if (mode === CanvasMode.IDLE) return;
-		let first = e.touches[0];
-
-		updateDotsGrid(first.pageX, first.pageY);
-		updateCanvas(true, first.pageX, first.pageY);
+	function handlePointerUp() {
+		points = [];
 	}
 
 	function updateDotsGrid(x: number, y: number) {
@@ -87,24 +83,15 @@
 		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF44"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>') center center`;
 	}
 
-	function updateCanvas(isDrawing: boolean, x: number, y: number) {
-		if (mode === CanvasMode.IDLE) return;
-
-		// Clear the current points if the mouse button is released
-		if (!isDrawing) {
-			if (points.length > 0) points = [];
-			return;
-		}
-
+	function updateCanvas(x: number, y: number, pressure: number) {
 		// Draw or erase the canvas based on the mouse position
 		if (mode === CanvasMode.DRAW) {
-			points.push([x, y]);
+			points.push([x, y, pressure]);
 			const stroke = getStroke(points, {
-				size: pencilRadius * 2.6,
+				size: pencilRadius * 2,
 				thinning: 0.5,
-				smoothing: 1,
+				smoothing: 0.8,
 				streamline: 0.8,
-				simulatePressure: true,
 				start: {
 					cap: true
 				},
@@ -134,10 +121,9 @@
 <div class:hidden={mode === CanvasMode.IDLE}>
 	<canvas
 		bind:this={canvas}
-		ontouchmove={handleTouchMove}
-		onmousemove={handleMouseMove}
-		ontouchend={() => updateCanvas(false, 0, 0)}
-		onmousedown={(e) => updateCanvas(e.buttons === 1, e.pageX, e.pageY)}
+		onpointermove={handlePointer}
+		onpointerdown={handlePointer}
+		onpointerup={handlePointerUp}
 		style="cursor: {pencilStyle};"
 	>
 	</canvas>
