@@ -4,7 +4,7 @@
 	import { getSvgPathFromStroke } from './Canvas';
 	const PENCIL_MAX_RADIUS = 30;
 	const PENCIL_MIN_RADIUS = 1;
-	const PENCIL_DEFAULT_RADIUS = 3;
+	const PENCIL_DEFAULT_RADIUS = 5;
 
 	const CANVAS_MAX_WIDTH = 3500;
 
@@ -69,14 +69,13 @@
 	}
 
 	function handlePointer(e: PointerEvent) {
-		updateDotsGrid(e.pageX, e.pageY);
+		const x = e.pageX;
+		const y = e.pageY;
+		updateDotsGrid(x, y);
 
-		if (e.buttons !== 1) return;
-		updateCanvas(e.pageX, e.pageY, e.pressure);
-	}
-
-	function handlePointerUp() {
-		points = [];
+		// Only draw when the primary button is pressed
+		if (e.buttons === 1) updateCanvas(e.pageX, e.pageY, e.pressure);
+		else if (points.length > 0) points = [];
 	}
 
 	function updateDotsGrid(x: number, y: number) {
@@ -125,7 +124,6 @@
 		bind:this={canvas}
 		onpointermove={handlePointer}
 		onpointerdown={handlePointer}
-		onpointerup={handlePointerUp}
 		style="cursor: {pencilStyle};"
 	>
 	</canvas>
@@ -163,7 +161,7 @@
 
 	.hidden * {
 		z-index: -5;
-		opacity: 0.2;
+		opacity: 0.1;
 
 		pointer-events: none;
 		background: none !important;
