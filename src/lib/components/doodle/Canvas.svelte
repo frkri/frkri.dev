@@ -2,6 +2,7 @@
 	import { CanvasMode } from '$lib/types/doodle';
 	import { getStroke, type StrokeOptions } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
+	import { page } from '$app/stores';
 	const STORAGE_KEY = 'doodle';
 	const STORAGE_SAVE_TIMEOUT = 1000;
 
@@ -52,7 +53,7 @@
 		ctx = context;
 
 		// Load the saved canvas
-		paths = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+		paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
 
 		// Will indirectly redraw the canvas
 		handleResize();
@@ -61,7 +62,7 @@
 	function handleResize() {
 		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
-		const height = window.innerHeight;
+		const height = document.body.scrollHeight + 80;
 
 		// Canvas size
 		canvas.width = width * dpr;
@@ -160,7 +161,7 @@
 	}
 
 	function saveCanvas() {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(paths));
+		localStorage.setItem(STORAGE_KEY + $page.url.pathname, JSON.stringify(paths));
 	}
 </script>
 
@@ -185,7 +186,6 @@
 		left: 0;
 
 		width: 100%;
-		height: 100%;
 
 		overflow: hidden;
 	}
