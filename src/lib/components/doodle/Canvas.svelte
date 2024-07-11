@@ -6,6 +6,8 @@
 	const PENCIL_MIN_RADIUS = 1;
 	const PENCIL_DEFAULT_RADIUS = 3;
 
+	const CANVAS_MAX_WIDTH = 3500;
+
 	const DOTS_SIZE = 3;
 	const DOTS_SHOW_RADIUS = 500;
 
@@ -17,7 +19,7 @@
 	let pencilRadius = $state(PENCIL_DEFAULT_RADIUS);
 	let pencilStyle = $derived.by(() => {
 		if (mode === CanvasMode.DRAW || mode === CanvasMode.ERASE)
-			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 2}' height='${PENCIL_MAX_RADIUS * 2}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFFAA'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 2) / 2}' cy='${(PENCIL_MAX_RADIUS * 2) / 2}' r='${pencilRadius}'></circle></svg>") 16 16, auto`;
+			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 2}' height='${PENCIL_MAX_RADIUS * 2}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFFAA'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 2) / 2}' cy='${(PENCIL_MAX_RADIUS * 2) / 2}' r='${pencilRadius}'></circle></svg>") 30 30, auto`;
 		return 'default';
 	});
 	let points: number[][] = [];
@@ -37,12 +39,15 @@
 		// todo scroll height
 		// todo requestAnimationFrame on canvas redraw
 		const dpr = window.devicePixelRatio;
-		canvas.width = window.innerWidth * dpr;
-		canvas.height = window.innerHeight * dpr;
+		const width = Math.min(window.innerWidth, CANVAS_MAX_WIDTH);
+		const height = window.innerHeight;
+
+		canvas.width = width * dpr;
+		canvas.height = height * dpr;
 
 		// does nothing?
-		canvas.style.width = `${window.innerWidth}px`;
-		canvas.style.height = `${window.innerHeight}px`;
+		canvas.style.width = `${width}px`;
+		canvas.style.height = `${height}px`;
 
 		ctx.scale(dpr, dpr);
 	}
@@ -95,7 +100,7 @@
 		if (mode === CanvasMode.DRAW) {
 			points.push([x, y]);
 			const stroke = getStroke(points, {
-				size: pencilRadius * 1.8,
+				size: pencilRadius * 2.6,
 				thinning: 0.5,
 				smoothing: 1,
 				streamline: 0.8,
