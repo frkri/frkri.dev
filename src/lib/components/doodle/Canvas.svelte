@@ -40,7 +40,8 @@
 		// todo requestAnimationFrame on canvas redraw
 		const dpr = window.devicePixelRatio;
 		const width = Math.min(window.innerWidth, CANVAS_MAX_WIDTH);
-		const height = window.innerHeight;
+		const height = document.body.scrollHeight + 100; // temp
+		// todo offset pageX with canvas x position
 
 		canvas.width = width * dpr;
 		canvas.height = height * dpr;
@@ -51,6 +52,7 @@
 
 		ctx.scale(dpr, dpr);
 	}
+
 	function handleKey(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
 		switch (e.key) {
@@ -134,7 +136,8 @@
 	canvas {
 		position: absolute;
 		top: 0;
-		left: 0;
+		left: 50%;
+		transform: translateX(-50%);
 
 		max-width: 100%;
 
