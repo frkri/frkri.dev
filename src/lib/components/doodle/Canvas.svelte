@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { CanvasMode } from '$lib/types/doodle';
-	import { getStroke } from 'perfect-freehand';
+	import { getStroke, type StrokeOptions } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
 	const PENCIL_MAX_RADIUS = 30;
 	const PENCIL_MIN_RADIUS = 1;
 	const PENCIL_DEFAULT_RADIUS = 5;
 
-	const CANVAS_MAX_WIDTH = 3500;
-
 	const DOTS_SIZE = 3;
-	const DOTS_SHOW_RADIUS = 500;
+	const DOTS_SHOW_RADIUS = 300;
+
+	const CANVAS_MAX_WIDTH = 4500;
+	let canvasLeftEdge: number;
+	let canvasRightEdge: number;
 
 	let canvas: HTMLCanvasElement;
 	let dots: HTMLDivElement;
@@ -22,6 +24,19 @@
 			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 2}' height='${PENCIL_MAX_RADIUS * 2}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 2) / 2}' cy='${(PENCIL_MAX_RADIUS * 2) / 2}' r='${pencilRadius}'></circle></svg>") 30 30, auto`;
 		return 'default';
 	});
+	let strokeStyle: StrokeOptions = $derived({
+		size: pencilRadius * 2,
+		thinning: 0.5,
+		smoothing: 0.8,
+		streamline: 0.8,
+		start: {
+			cap: true
+		},
+		end: {
+			cap: true
+		}
+	});
+
 	let points: number[][] = [];
 
 	$effect(() => {
@@ -36,21 +51,25 @@
 	});
 
 	function handleResize() {
-		// todo scroll height
 		// todo requestAnimationFrame on canvas redraw
 		const dpr = window.devicePixelRatio;
-		const width = Math.min(window.innerWidth, CANVAS_MAX_WIDTH);
-		const height = document.body.scrollHeight + 100; // temp
-		// todo offset pageX with canvas x position
+		const width = window.innerWidth;
+		const height = window.innerHeight;
 
+		// Canvas size
 		canvas.width = width * dpr;
 		canvas.height = height * dpr;
-
-		// does nothing?
-		canvas.style.width = `${width}px`;
-		canvas.style.height = `${height}px`;
-
 		ctx.scale(dpr, dpr);
+
+		// Canvas bounds
+		const canvasRect = canvas.getBoundingClientRect();
+		const canvasMiddle = canvasRect.width / 2;
+
+		canvasLeftEdge = canvasMiddle - CANVAS_MAX_WIDTH / 2;
+		canvasRightEdge = canvasMiddle + CANVAS_MAX_WIDTH / 2;
+
+		// Reset the canvas
+		points = [];
 	}
 
 	function handleKey(e: KeyboardEvent) {
@@ -71,36 +90,30 @@
 	function handlePointer(e: PointerEvent) {
 		const x = e.pageX;
 		const y = e.pageY;
+
+		// Only draw within the canvas bounds
+		if (x < canvasLeftEdge || x > canvasRightEdge) return;
 		updateDotsGrid(x, y);
 
 		// Only draw when the primary button is pressed
-		if (e.buttons === 1) updateCanvas(e.pageX, e.pageY, e.pressure);
-		else if (points.length > 0) points = [];
+		if (e.buttons === 1) updateCanvas(x, y, e.pressure);
+	}
+
+	function handlePointerUp() {
+		points = [];
 	}
 
 	function updateDotsGrid(x: number, y: number) {
 		// Create a radial gradient mask that only shows the dots near the cursor position
 		dots.style.background = `radial-gradient(circle ${DOTS_SHOW_RADIUS}px at ${x}px ${y}px, transparent 0%, var(--background-primary)),
-		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF44"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>') center center`;
+		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF55"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>') center center`;
 	}
 
 	function updateCanvas(x: number, y: number, pressure: number) {
 		// Draw or erase the canvas based on the mouse position
 		if (mode === CanvasMode.DRAW) {
 			points.push([x, y, pressure]);
-			const stroke = getStroke(points, {
-				size: pencilRadius * 2,
-				thinning: 0.5,
-				smoothing: 0.8,
-				streamline: 0.8,
-				start: {
-					cap: true
-				},
-				end: {
-					cap: true
-				}
-			});
-
+			const stroke = getStroke(points, strokeStyle);
 			const svgPath = getSvgPathFromStroke(stroke);
 			const path = new Path2D(svgPath);
 
@@ -119,11 +132,13 @@
 </script>
 
 <svelte:window onkeydown={handleKey} onresize={handleResize} />
-<div class:hidden={mode === CanvasMode.IDLE}>
+<div class="wrapper" class:hidden={mode === CanvasMode.IDLE}>
 	<canvas
 		bind:this={canvas}
 		onpointermove={handlePointer}
 		onpointerdown={handlePointer}
+		onpointerup={handlePointerUp}
+		onpointerleave={handlePointerUp}
 		style="cursor: {pencilStyle};"
 	>
 	</canvas>
@@ -131,15 +146,20 @@
 </div>
 
 <style>
-	canvas {
+	.wrapper * {
 		position: absolute;
 		top: 0;
-		left: 50%;
-		transform: translateX(-50%);
+		left: 0;
 
-		max-width: 100%;
+		width: 100%;
+		height: 100%;
 
+		overflow: hidden;
+	}
+
+	canvas {
 		transition: all 150ms ease-in-out;
+
 		z-index: 1;
 		opacity: 1;
 
@@ -148,13 +168,6 @@
 	}
 
 	#dots {
-		position: fixed;
-		top: 0;
-		left: 0;
-
-		width: 100%;
-		height: 100%;
-
 		z-index: -5;
 		pointer-events: none;
 	}
