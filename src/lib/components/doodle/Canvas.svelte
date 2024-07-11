@@ -2,6 +2,9 @@
 	import { CanvasMode } from '$lib/types/doodle';
 	import { getStroke, type StrokeOptions } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
+	const STORAGE_KEY = 'doodle';
+	const STORAGE_SAVE_TIMEOUT = 1000;
+
 	const PENCIL_MAX_RADIUS = 30;
 	const PENCIL_MIN_RADIUS = 1;
 	const PENCIL_DEFAULT_RADIUS = 5;
@@ -38,6 +41,7 @@
 	});
 
 	let points: number[][] = [];
+	let paths: number[][][] = [];
 
 	$effect(() => {
 		const context = canvas.getContext('2d');
@@ -45,13 +49,16 @@
 			console.warn('Failed to get canvas context ):');
 			return;
 		}
-
 		ctx = context;
+
+		// Load the saved canvas
+		paths = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+		// Will indirectly redraw the canvas
 		handleResize();
 	});
 
 	function handleResize() {
-		// todo requestAnimationFrame on canvas redraw
 		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
 		const height = window.innerHeight;
@@ -68,8 +75,24 @@
 		canvasLeftEdge = canvasMiddle - CANVAS_MAX_WIDTH / 2;
 		canvasRightEdge = canvasMiddle + CANVAS_MAX_WIDTH / 2;
 
-		// Reset the canvas
+		// Redraw and reset the canvas
 		points = [];
+		redrawCanvas();
+	}
+
+	function redrawCanvas() {
+		paths.forEach((pathPoints) => {
+			// Adjust the path points to the canvas bounds
+			pathPoints = pathPoints.map(([x, y, pressure]) => [x + canvasLeftEdge, y, pressure]);
+
+			const stroke = getStroke(pathPoints, strokeStyle);
+			const svgPath = getSvgPathFromStroke(stroke);
+			const path = new Path2D(svgPath);
+
+			// todo: add color to the path
+			ctx.fillStyle = color;
+			ctx.fill(path);
+		});
 	}
 
 	function handleKey(e: KeyboardEvent) {
@@ -91,7 +114,7 @@
 		const x = e.pageX;
 		const y = e.pageY;
 
-		// Only draw within the canvas bounds
+		// Allow movement only within the canvas bounds
 		if (x < canvasLeftEdge || x > canvasRightEdge) return;
 		updateDotsGrid(x, y);
 
@@ -99,8 +122,13 @@
 		if (e.buttons === 1) updateCanvas(x, y, e.pressure);
 	}
 
+	let saveCanvasTimeout: number;
 	function handlePointerUp() {
+		paths.push(points.map(([x, y, pressure]) => [x, y, pressure]));
 		points = [];
+
+		clearInterval(saveCanvasTimeout);
+		saveCanvasTimeout = setTimeout(saveCanvas, STORAGE_SAVE_TIMEOUT) as unknown as number;
 	}
 
 	function updateDotsGrid(x: number, y: number) {
@@ -120,6 +148,7 @@
 			ctx.fillStyle = color;
 			ctx.fill(path);
 		} else if (mode === CanvasMode.ERASE) {
+			// todo erase path points
 			ctx.globalCompositeOperation = 'destination-out';
 
 			ctx.beginPath();
@@ -128,6 +157,10 @@
 
 			ctx.globalCompositeOperation = 'source-over';
 		}
+	}
+
+	function saveCanvas() {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(paths));
 	}
 </script>
 
