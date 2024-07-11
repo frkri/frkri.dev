@@ -2,9 +2,9 @@
 	import { CanvasMode } from '$lib/types/doodle';
 	import { getStroke } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
-	const PENCIL_MAX_RADIUS = 20;
+	const PENCIL_MAX_RADIUS = 30;
 	const PENCIL_MIN_RADIUS = 1;
-	const PENCIL_DEFAULT_RADIUS = PENCIL_MAX_RADIUS / 2;
+	const PENCIL_DEFAULT_RADIUS = 3;
 
 	const DOTS_SIZE = 3;
 	const DOTS_SHOW_RADIUS = 500;
@@ -46,7 +46,6 @@
 
 		ctx.scale(dpr, dpr);
 	}
-
 	function handleKey(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
 		switch (e.key) {
