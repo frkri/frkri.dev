@@ -121,6 +121,10 @@
 		const x = e.pageX;
 		const y = e.pageY;
 
+		// Show the border when the cursor is near the canvas edges
+		dots.style.borderLeftWidth = x < canvasLeftEdge ? '40px' : '0px';
+		dots.style.borderRightWidth = x > canvasRightEdge ? '40px' : '0px';
+
 		// Allow movement only within the canvas bounds
 		if (x < canvasLeftEdge || x > canvasRightEdge) return;
 		updateDotsGrid(x, y);
@@ -131,7 +135,7 @@
 
 	let saveCanvasTimeout: number;
 	function handlePointerUp() {
-		paths.push(points.map(([x, y, pressure]) => [x, y, pressure]));
+		paths.push(points);
 		points = [];
 
 		clearInterval(saveCanvasTimeout);
@@ -182,7 +186,7 @@
 		style="cursor: {pencilStyle};"
 	>
 	</canvas>
-	<div id="dots" bind:this={dots} aria-hidden="true" style="max-width: {CANVAS_MAX_WIDTH}px"></div>
+	<div id="dots" bind:this={dots} aria-hidden="true"></div>
 </div>
 
 <style>
@@ -192,11 +196,10 @@
 		left: 0;
 
 		overflow: hidden;
+		transition: all 150ms ease-in-out;
 	}
 
 	canvas {
-		transition: all 150ms ease-in-out;
-
 		z-index: 1;
 		opacity: 1;
 
@@ -206,6 +209,7 @@
 
 	#dots {
 		width: 100%;
+		border: 0px solid #ffffff44;
 
 		z-index: -5;
 		pointer-events: none;
@@ -217,5 +221,6 @@
 
 		pointer-events: none;
 		background: none !important;
+		border: none !important;
 	}
 </style>
