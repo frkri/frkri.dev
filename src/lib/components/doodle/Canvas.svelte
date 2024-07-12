@@ -3,6 +3,7 @@
 	import { getStroke, type StrokeOptions } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
 	import { page } from '$app/stores';
+
 	const STORAGE_KEY = 'doodle';
 	const STORAGE_SAVE_TIMEOUT = 1000;
 
@@ -53,13 +54,14 @@
 		ctx = context;
 
 		// Load the saved canvas
-		paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
+		if (paths.length === 0)
+			paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
 
 		// Will indirectly redraw the canvas
 		handleResize();
 	});
 
-	function handleResize() {
+	async function handleResize() {
 		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
 		const height = document.body.scrollHeight + 80;
@@ -70,14 +72,15 @@
 		// Canvas size
 		canvas.width = width * dpr;
 		canvas.height = height * dpr;
+
+		canvas.style.width = width + 'px';
+		canvas.style.height = height + 'px';
 		ctx.scale(dpr, dpr);
 
 		// Canvas bounds
-		const canvasRect = canvas.getBoundingClientRect();
-		const canvasMiddle = canvasRect.width / 2;
-
-		canvasLeftEdge = canvasMiddle - CANVAS_MAX_WIDTH / 2;
-		canvasRightEdge = canvasMiddle + CANVAS_MAX_WIDTH / 2;
+		const windowMiddle = window.innerWidth / 2;
+		canvasLeftEdge = windowMiddle - CANVAS_MAX_WIDTH / 2;
+		canvasRightEdge = windowMiddle + CANVAS_MAX_WIDTH / 2;
 
 		// Redraw and reset the canvas
 		points = [];
@@ -188,12 +191,12 @@
 		top: 0;
 		left: 0;
 
-		width: 100%;
 		overflow: hidden;
 	}
 
 	canvas {
 		transition: all 150ms ease-in-out;
+		
 
 		z-index: 1;
 		opacity: 1;
@@ -203,6 +206,8 @@
 	}
 
 	#dots {
+		width: 100%;
+
 		z-index: -5;
 		pointer-events: none;
 	}
