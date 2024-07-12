@@ -64,6 +64,9 @@
 		const width = window.innerWidth;
 		const height = document.body.scrollHeight + 80;
 
+		// Dots size
+		dots.style.height = height + 'px';
+
 		// Canvas size
 		canvas.width = width * dpr;
 		canvas.height = height * dpr;
@@ -176,7 +179,7 @@
 		style="cursor: {pencilStyle};"
 	>
 	</canvas>
-	<div id="dots" bind:this={dots} aria-hidden="true"></div>
+	<div id="dots" bind:this={dots} aria-hidden="true" style="max-width: {CANVAS_MAX_WIDTH}px"></div>
 </div>
 
 <style>
@@ -186,7 +189,6 @@
 		left: 0;
 
 		width: 100%;
-
 		overflow: hidden;
 	}
 
