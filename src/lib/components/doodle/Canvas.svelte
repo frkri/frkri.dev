@@ -59,6 +59,9 @@
 
 		// Will indirectly redraw the canvas
 		handleResize();
+
+		// Workaround for to rerender the canvas when mode has changed
+		if (mode) return;
 	});
 
 	async function handleResize() {
@@ -217,7 +220,7 @@
 
 	.hidden * {
 		z-index: -5;
-		opacity: 0.1;
+		opacity: 0.05;
 
 		pointer-events: none;
 		background: none !important;
