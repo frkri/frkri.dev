@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CanvasMode } from '$lib/types/doodle';
+	import { CanvasMode, type Path } from '$lib/types/doodle';
 	import { getStroke, type StrokeOptions } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
 	import { page } from '$app/stores';
@@ -43,7 +43,7 @@
 	});
 
 	let points: number[][] = [];
-	let paths: number[][][] = [];
+	let paths: Path[] = [];
 
 	$effect(() => {
 		const context = canvas.getContext('2d');
@@ -91,16 +91,20 @@
 	}
 
 	function redrawCanvas() {
-		paths.forEach((pathPoints) => {
-			// Adjust the path points to the canvas bounds
-			pathPoints = pathPoints.map(([x, y, pressure]) => [x + canvasLeftEdge, y, pressure]);
+		paths.forEach((localPath) => {
+			// Apply the path path options
+			const localStrokeStyle = { ...strokeStyle, size: localPath.width * 2 };
+			const pathPoints = localPath.points.map(([x, y, pressure]) => [
+				x + canvasLeftEdge,
+				y,
+				pressure
+			]);
 
-			const stroke = getStroke(pathPoints, strokeStyle);
+			const stroke = getStroke(pathPoints, localStrokeStyle);
 			const svgPath = getSvgPathFromStroke(stroke);
 			const path = new Path2D(svgPath);
 
-			// todo: add color to the path
-			ctx.fillStyle = color;
+			ctx.fillStyle = localPath.color;
 			ctx.fill(path);
 		});
 	}
@@ -138,7 +142,8 @@
 
 	let saveCanvasTimeout: number;
 	function handlePointerUp() {
-		paths.push(points);
+		const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);
+		paths.push({ color, width: pencilRadius, points: transformedPoints });
 		points = [];
 
 		clearInterval(saveCanvasTimeout);
