@@ -67,7 +67,7 @@
 	async function handleResize() {
 		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
-		const height = document.body.scrollHeight + 80;
+		const height = document.body.scrollHeight;
 
 		// Dots size
 		dots.style.height = height + 'px';
@@ -199,7 +199,7 @@
 		left: 0;
 
 		overflow: hidden;
-		transition: all 150ms ease-in-out;
+		transition: opacity 150ms ease-in-out;
 	}
 
 	canvas {
@@ -212,6 +212,8 @@
 
 	#dots {
 		width: 100%;
+
+		transition-property: border;
 		border: 0px solid #ffffff44;
 
 		z-index: -5;
