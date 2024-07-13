@@ -16,6 +16,6 @@
 		</style>
 	</noscript>
 
-	<Canvas bind:mode bind:color />
+	<Canvas {mode} {color} />
 	<ToolBar bind:mode bind:color />
 </div>

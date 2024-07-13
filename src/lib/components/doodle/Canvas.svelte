@@ -3,6 +3,7 @@
 	import { getStroke, type StrokeOptions } from 'perfect-freehand';
 	import { getSvgPathFromStroke } from './Canvas';
 	import { page } from '$app/stores';
+	import { tick } from 'svelte';
 
 	const STORAGE_KEY = 'doodle';
 	const STORAGE_SAVE_TIMEOUT = 1000;
@@ -22,13 +23,8 @@
 	let dots: HTMLDivElement;
 	let ctx: CanvasRenderingContext2D;
 
-	let { mode = $bindable(), color = $bindable() }: { mode: CanvasMode; color: string } = $props();
+	let { mode, color }: { mode: CanvasMode; color: string } = $props();
 	let pencilRadius = $state(PENCIL_DEFAULT_RADIUS);
-	let pencilStyle = $derived.by(() => {
-		if (mode === CanvasMode.DRAW || mode === CanvasMode.ERASE)
-			return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 2}' height='${PENCIL_MAX_RADIUS * 2}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 2) / 2}' cy='${(PENCIL_MAX_RADIUS * 2) / 2}' r='${pencilRadius}'></circle></svg>") 30 30, auto`;
-		return 'default';
-	});
 	let strokeStyle: StrokeOptions = $derived({
 		size: pencilRadius * 2,
 		thinning: 0.5,
@@ -59,15 +55,16 @@
 
 		// Will indirectly redraw the canvas
 		handleResize();
-
-		// Workaround for to rerender the canvas when mode has changed
-		if (mode) return;
 	});
 
 	async function handleResize() {
 		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
-		const height = document.body.scrollHeight;
+		// Where 80 is the top margin of the body
+		const height = document.body.scrollHeight + 80;
+
+		// Resize the cursor based on the pencil radius and device pixel ratio
+		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") 60 60, auto`;
 
 		// Dots size
 		dots.style.height = height + 'px';
@@ -80,14 +77,17 @@
 		canvas.style.height = height + 'px';
 		ctx.scale(dpr, dpr);
 
-		// Canvas bounds
-		const windowMiddle = window.innerWidth / 2;
-		canvasLeftEdge = windowMiddle - CANVAS_MAX_WIDTH / 2;
-		canvasRightEdge = windowMiddle + CANVAS_MAX_WIDTH / 2;
+		// Wait for the dom to update
+		tick().then(() => {
+			// Canvas bounds
+			const windowMiddle = window.innerWidth / 2;
+			canvasLeftEdge = windowMiddle - CANVAS_MAX_WIDTH / 2;
+			canvasRightEdge = windowMiddle + CANVAS_MAX_WIDTH / 2;
 
-		// Redraw and reset the canvas
-		points = [];
-		redrawCanvas();
+			// Redraw and reset the canvas
+			points = [];
+			redrawCanvas();
+		});
 	}
 
 	function redrawCanvas() {
@@ -140,7 +140,7 @@
 		if (e.buttons === 1) updateCanvas(x, y, e.pressure);
 	}
 
-	let saveCanvasTimeout: number;
+	let saveCanvasTimeout: number | undefined = undefined;
 	function handlePointerUp() {
 		const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);
 		paths.push({ color, width: pencilRadius, points: transformedPoints });
@@ -191,7 +191,6 @@
 		onpointerdown={handlePointer}
 		onpointerup={handlePointerUp}
 		onpointerleave={handlePointerUp}
-		style="cursor: {pencilStyle};"
 	>
 	</canvas>
 	<div id="dots" bind:this={dots} aria-hidden="true"></div>
