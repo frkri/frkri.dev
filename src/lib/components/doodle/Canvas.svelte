@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { CanvasMode, type Path } from '$lib/types/doodle';
 	import { type StrokeOptions } from 'perfect-freehand';
-	import { getPath } from './Canvas';
 	import { page } from '$app/stores';
 	import { tick } from 'svelte';
+	import CanvasWorker from './Canvas.worker?worker';
 
 	const STORAGE_KEY = 'doodle';
-	const STORAGE_SAVE_TIMEOUT = 1000;
+	const STORAGE_MAX_PATHS = 4000;
 
 	const PENCIL_MAX_RADIUS = 30;
 	const PENCIL_MIN_RADIUS = 1;
@@ -16,12 +16,12 @@
 	const DOTS_SHOW_RADIUS = 300;
 
 	const CANVAS_MAX_WIDTH = 4500;
-	let canvasLeftEdge: number;
-	let canvasRightEdge: number;
+	let canvasLeftEdge: number = $state(0);
+	let canvasRightEdge: number = $state(0);
 
 	let canvas: HTMLCanvasElement;
 	let dots: HTMLDivElement;
-	let ctx: CanvasRenderingContext2D;
+	let worker: Worker;
 
 	let { mode, color }: { mode: CanvasMode; color: string } = $props();
 	let pencilRadius = $state(PENCIL_DEFAULT_RADIUS);
@@ -38,36 +38,45 @@
 		}
 	});
 
-	/**
-	 * Current temporary points that are being drawn on the canvas
-	 */
-	let points: number[][] = [];
-	/**
-	 * The paths that are complete and drawn on the canvas
-	 */
-	let paths: Path[] = [];
-
 	$effect(() => {
-		const context = canvas.getContext('2d');
-		if (!context) {
-			console.warn('Failed to get canvas context ):');
-			return;
-		}
-		ctx = context;
+		if (!worker) {
+			const offscreenCanvas = canvas.transferControlToOffscreen();
+			worker = new CanvasWorker();
 
-		// Load the saved canvas
-		if (paths.length === 0)
-			paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
+			worker.onmessage = (e) => {
+				const { type, data } = e.data;
+				switch (type) {
+					case 'saveCanvas':
+						saveCanvas(data.paths);
+						break;
+					default:
+						console.warn(`Unhandled message type on main: ${type}`);
+				}
+			};
+			worker.postMessage({ type: 'init', data: { canvas: offscreenCanvas } }, [offscreenCanvas]);
+
+			// Load the saved canvas
+			const paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
+			worker.postMessage({ type: 'updatePaths', data: { paths } });
+		}
 
 		// Will indirectly redraw the canvas
 		handleResize();
+	});
+
+	$effect(() => {
+		if (worker)
+			worker.postMessage({
+				type: 'updateState',
+				data: { mode, pencilRadius, color, strokeStyle, canvasLeftEdge }
+			});
 	});
 
 	let resizeCanvasTimeout: number | undefined = undefined;
 	async function scheduleHandleResize() {
 		if (mode === CanvasMode.IDLE) {
 			clearInterval(resizeCanvasTimeout);
-			resizeCanvasTimeout = setTimeout(handleResize, 100) as unknown as number;
+			resizeCanvasTimeout = setTimeout(handleResize, 50) as unknown as number;
 		} else {
 			handleResize();
 		}
@@ -86,12 +95,9 @@
 		dots.style.height = height + 'px';
 
 		// Canvas size
-		canvas.width = width * dpr;
-		canvas.height = height * dpr;
-
 		canvas.style.width = width + 'px';
 		canvas.style.height = height + 'px';
-		ctx.scale(dpr, dpr);
+		worker.postMessage({ type: 'resizeCanvas', data: { width, height, dpr } });
 
 		// Wait for the dom to update
 		tick().then(() => {
@@ -101,31 +107,20 @@
 			canvasRightEdge = windowMiddle + CANVAS_MAX_WIDTH / 2;
 
 			// Redraw and reset the canvas
-			points = [];
+			worker.postMessage({
+				type: 'updatePoints',
+				data: {
+					points: []
+				}
+			});
 			redrawCanvas();
 		});
 	}
 
 	async function redrawCanvas(deletedPaths?: Path[]) {
-		// Either redraw all the paths or the given deleted paths only
-		const selectedPaths = deletedPaths || paths;
-		selectedPaths.forEach((localPath) => {
-			const localStrokeStyle = { ...strokeStyle, size: localPath.width * 2 };
-			const pathPoints = localPath.points.map(([x, y, pressure]) => [
-				x + canvasLeftEdge,
-				y,
-				pressure
-			]);
-			const path = getPath(pathPoints, localStrokeStyle);
-
-			if (deletedPaths) {
-				ctx.globalCompositeOperation = 'destination-out';
-				ctx.fillStyle = localPath.color + 'CC';
-			} else {
-				ctx.fillStyle = localPath.color;
-			}
-			ctx.fill(path);
-			if (deletedPaths) ctx.globalCompositeOperation = 'source-over';
+		worker.postMessage({
+			type: 'redrawCanvas',
+			data: { strokeStyle, canvasLeftEdge, deletedPaths }
 		});
 	}
 
@@ -161,18 +156,14 @@
 		if (e.buttons === 1) updateCanvas(x, y, e.pressure);
 	}
 
-	let saveCanvasTimeout: number | undefined = undefined;
 	async function handlePointerUp() {
 		if (mode === CanvasMode.IDLE) return;
-		if (mode === CanvasMode.DRAW && points.length > 0) {
-			// Translate the points to the canvas bounds, enabling the canvas to resized without displacing the doodle
-			const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);
-			paths.push({ color, width: pencilRadius, points: transformedPoints });
-		}
-
-		points = [];
-		clearInterval(saveCanvasTimeout);
-		saveCanvasTimeout = setTimeout(saveCanvas, STORAGE_SAVE_TIMEOUT) as unknown as number;
+		worker.postMessage({
+			type: 'handlePointerUp',
+			data: {
+				mode
+			}
+		});
 	}
 
 	async function updateDotsGrid(x: number, y: number) {
@@ -182,30 +173,14 @@
 	}
 
 	async function updateCanvas(x: number, y: number, pressure: number) {
-		// Draw or erase the canvas based on the mouse position
-		if (mode === CanvasMode.DRAW) {
-			points.push([x, y, pressure]);
-			const path = getPath(points, strokeStyle);
-
-			ctx.fillStyle = color;
-			ctx.fill(path);
-		} else if (mode === CanvasMode.ERASE) {
-			// Find the paths that are overlapping with the cursor position
-			const overlappingPaths = paths.filter((path) =>
-				path.points.some(
-					([px, py]) =>
-						Math.abs(px + canvasLeftEdge - x) < pencilRadius * 2 &&
-						Math.abs(py - y) < pencilRadius * 2
-				)
-			);
-
-			if (overlappingPaths.length === 0) return;
-			paths = paths.filter((path) => !overlappingPaths.includes(path));
-			redrawCanvas(overlappingPaths);
-		}
+		worker.postMessage({
+			type: 'updateCanvas',
+			data: { x, y, pressure }
+		});
 	}
 
-	async function saveCanvas() {
+	async function saveCanvas(paths: Path[]) {
+		if (paths.length >= STORAGE_MAX_PATHS) paths = paths.slice(-STORAGE_MAX_PATHS);
 		localStorage.setItem(STORAGE_KEY + $page.url.pathname, JSON.stringify(paths));
 	}
 </script>
