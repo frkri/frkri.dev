@@ -15,6 +15,7 @@
 	const DOTS_SHOW_RADIUS = 300;
 
 	const CANVAS_MAX_WIDTH = 5500;
+	const CANVAS_MAX_HEIGHT = 5500;
 	let canvasLeftEdge: number = $state(0);
 	let canvasRightEdge: number = $state(0);
 
@@ -165,6 +166,7 @@
 
 		// Allow movement only within the canvas bounds
 		if (x < canvasLeftEdge || x > canvasRightEdge) return;
+		if (y < 0 || y > CANVAS_MAX_HEIGHT) return;
 		updateDotsGrid(x, y);
 
 		// Only draw when the primary button is pressed
