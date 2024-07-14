@@ -181,7 +181,7 @@
 	}
 
 	async function updateCursor(mode: CanvasMode, pencilRadius: number, color: string) {
-		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") 60 60, auto`;
+		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") ${PENCIL_MAX_RADIUS * 2} ${PENCIL_MAX_RADIUS * 2}, auto`;
 	}
 
 	async function updateDotsGrid(x: number, y: number) {

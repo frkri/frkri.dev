@@ -113,7 +113,7 @@ async function redrawCanvas(
 
 		if (deletedPaths) {
 			ctx.globalCompositeOperation = 'destination-out';
-			ctx.fillStyle = localPath.color + 'CC';
+			ctx.fillStyle = 'black';
 		} else {
 			ctx.fillStyle = localPath.color;
 		}
@@ -138,8 +138,8 @@ async function updateCanvas(x: number, y: number, pressure: number) {
 		const overlappingPaths = paths.filter((path) =>
 			path.points.some(
 				([px, py]) =>
-					Math.abs(px + canvasLeftEdge - x) < pencilRadius * 2 &&
-					Math.abs(py - y) < pencilRadius * 2
+					Math.abs(px + canvasLeftEdge - x) < pencilRadius * 1.5 &&
+					Math.abs(py - y) < pencilRadius * 1.5
 			)
 		);
 
