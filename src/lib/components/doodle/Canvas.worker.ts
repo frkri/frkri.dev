@@ -123,10 +123,10 @@ async function redrawCanvas(
 }
 
 async function updateCanvas(x: number, y: number, pressure: number) {
-	// Limit the number of points to 50
-	if (points.length >= 50) points = points.slice(-50);
-
 	if (mode === CanvasMode.DRAW) {
+		// Limit the number of points to 50
+		if (points.length > 1500) points = [];
+
 		// Draw or erase the canvas based on the mouse position
 		points.push([x, y, pressure]);
 		const path = getPath(points, strokeStyle);
