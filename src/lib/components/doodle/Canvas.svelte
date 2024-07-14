@@ -2,7 +2,6 @@
 	import { CanvasMode, type Path } from '$lib/types/doodle';
 	import { type StrokeOptions } from 'perfect-freehand';
 	import { page } from '$app/stores';
-	import { tick } from 'svelte';
 	import CanvasWorker from './Canvas.worker?worker';
 
 	const STORAGE_KEY = 'doodle';
@@ -66,7 +65,7 @@
 
 	$effect(() => {
 		// Resize the cursor based on the pencil radius
-		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") 60 60, auto`;
+		updateCursor(mode, pencilRadius, color);
 	});
 
 	function setupWorker(offscreenCanvas: OffscreenCanvas): Worker {
@@ -105,6 +104,9 @@
 		const width = window.innerWidth;
 		// Where 80 is the top margin of the body
 		const height = document.body.scrollHeight + 80;
+
+		// Update the cursor size
+		updateCursor(mode, pencilRadius, color);
 
 		// Dots size
 		dots.style.height = height + 'px';
@@ -176,6 +178,10 @@
 				mode
 			}
 		});
+	}
+
+	async function updateCursor(mode: CanvasMode, pencilRadius: number, color: string) {
+		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") 60 60, auto`;
 	}
 
 	async function updateDotsGrid(x: number, y: number) {
