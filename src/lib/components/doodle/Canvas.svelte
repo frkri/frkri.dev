@@ -64,7 +64,7 @@
 	});
 
 	async function handleResize() {
-		const dpr = 4;
+		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
 		// Where 80 is the top margin of the body
 		const height = document.body.scrollHeight + 80;
