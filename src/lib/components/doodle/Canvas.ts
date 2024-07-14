@@ -1,3 +1,5 @@
+import { getStroke, type StrokeOptions } from 'perfect-freehand';
+
 // As per https://github.com/steveruizok/perfect-freehand
 const average = (a: number, b: number) => (a + b) / 2;
 
@@ -27,4 +29,10 @@ export function getSvgPathFromStroke(points: number[][], closed = true) {
 	}
 
 	return result;
+}
+
+export function getPath(points: number[][], strokeStyle: StrokeOptions) {
+	const stroke = getStroke(points, strokeStyle);
+	const svgPath = getSvgPathFromStroke(stroke);
+	return new Path2D(svgPath);
 }

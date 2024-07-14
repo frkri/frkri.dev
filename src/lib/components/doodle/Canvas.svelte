@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CanvasMode, type Path } from '$lib/types/doodle';
-	import { getStroke, type StrokeOptions } from 'perfect-freehand';
-	import { getSvgPathFromStroke } from './Canvas';
+	import { type StrokeOptions } from 'perfect-freehand';
+	import { getPath } from './Canvas';
 	import { page } from '$app/stores';
 	import { tick } from 'svelte';
 
@@ -38,7 +38,13 @@
 		}
 	});
 
+	/**
+	 * Current temporary points that are being drawn on the canvas
+	 */
 	let points: number[][] = [];
+	/**
+	 * The paths that are complete and drawn on the canvas
+	 */
 	let paths: Path[] = [];
 
 	$effect(() => {
@@ -58,7 +64,7 @@
 	});
 
 	async function handleResize() {
-		const dpr = window.devicePixelRatio;
+		const dpr = 4;
 		const width = window.innerWidth;
 		// Where 80 is the top margin of the body
 		const height = document.body.scrollHeight + 80;
@@ -90,26 +96,30 @@
 		});
 	}
 
-	function redrawCanvas() {
-		paths.forEach((localPath) => {
-			// Apply the path path options
+	async function redrawCanvas(deletedPaths?: Path[]) {
+		// Either redraw all the paths or the given deleted paths only
+		const selectedPaths = deletedPaths || paths;
+		selectedPaths.forEach((localPath) => {
 			const localStrokeStyle = { ...strokeStyle, size: localPath.width * 2 };
 			const pathPoints = localPath.points.map(([x, y, pressure]) => [
 				x + canvasLeftEdge,
 				y,
 				pressure
 			]);
+			const path = getPath(pathPoints, localStrokeStyle);
 
-			const stroke = getStroke(pathPoints, localStrokeStyle);
-			const svgPath = getSvgPathFromStroke(stroke);
-			const path = new Path2D(svgPath);
-
-			ctx.fillStyle = localPath.color;
+			if (deletedPaths) {
+				ctx.globalCompositeOperation = 'destination-out';
+				ctx.fillStyle = localPath.color + 'CC';
+			} else {
+				ctx.fillStyle = localPath.color;
+			}
 			ctx.fill(path);
+			if (deletedPaths) ctx.globalCompositeOperation = 'source-over';
 		});
 	}
 
-	function handleKey(e: KeyboardEvent) {
+	async function handleKey(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
 		switch (e.key) {
 			case '+':
@@ -124,7 +134,7 @@
 		}
 	}
 
-	function handlePointer(e: PointerEvent) {
+	async function handlePointer(e: PointerEvent) {
 		const x = e.pageX;
 		const y = e.pageY;
 
@@ -141,44 +151,49 @@
 	}
 
 	let saveCanvasTimeout: number | undefined = undefined;
-	function handlePointerUp() {
-		const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);
-		paths.push({ color, width: pencilRadius, points: transformedPoints });
-		points = [];
+	async function handlePointerUp() {
+		if (mode === CanvasMode.DRAW && points.length > 0) {
+			// Translate the points to the canvas bounds, enabling the canvas to resized without displacing the doodle
+			const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);
+			paths.push({ color, width: pencilRadius, points: transformedPoints });
+		}
 
+		points = [];
 		clearInterval(saveCanvasTimeout);
 		saveCanvasTimeout = setTimeout(saveCanvas, STORAGE_SAVE_TIMEOUT) as unknown as number;
 	}
 
-	function updateDotsGrid(x: number, y: number) {
-		// Create a radial gradient mask that only shows the dots near the cursor position
+	async function updateDotsGrid(x: number, y: number) {
+		// Create a radial gradient mask that only shows the background (grid of dots) near the cursor position
 		dots.style.background = `radial-gradient(circle ${DOTS_SHOW_RADIUS}px at ${x}px ${y}px, transparent 0%, var(--background-primary)),
 		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23FFFFFF55"><circle cx="50" cy="50" r="${DOTS_SIZE}"></circle></svg>') center center`;
 	}
 
-	function updateCanvas(x: number, y: number, pressure: number) {
+	async function updateCanvas(x: number, y: number, pressure: number) {
 		// Draw or erase the canvas based on the mouse position
 		if (mode === CanvasMode.DRAW) {
 			points.push([x, y, pressure]);
-			const stroke = getStroke(points, strokeStyle);
-			const svgPath = getSvgPathFromStroke(stroke);
-			const path = new Path2D(svgPath);
+			const path = getPath(points, strokeStyle);
 
 			ctx.fillStyle = color;
 			ctx.fill(path);
 		} else if (mode === CanvasMode.ERASE) {
-			// todo erase path points
-			ctx.globalCompositeOperation = 'destination-out';
+			// Find the paths that are overlapping with the cursor position
+			const overlappingPaths = paths.filter((path) =>
+				path.points.some(
+					([px, py]) =>
+						Math.abs(px + canvasLeftEdge - x) < pencilRadius * 2 &&
+						Math.abs(py - y) < pencilRadius * 2
+				)
+			);
 
-			ctx.beginPath();
-			ctx.arc(x, y, pencilRadius, 0, 2 * Math.PI);
-			ctx.fill();
-
-			ctx.globalCompositeOperation = 'source-over';
+			if (overlappingPaths.length === 0) return;
+			paths = paths.filter((path) => !overlappingPaths.includes(path));
+			redrawCanvas(overlappingPaths);
 		}
 	}
 
-	function saveCanvas() {
+	async function saveCanvas() {
 		localStorage.setItem(STORAGE_KEY + $page.url.pathname, JSON.stringify(paths));
 	}
 </script>
