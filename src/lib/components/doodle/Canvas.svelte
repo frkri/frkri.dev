@@ -63,6 +63,16 @@
 		handleResize();
 	});
 
+	let resizeCanvasTimeout: number | undefined = undefined;
+	async function scheduleHandleResize() {
+		if (mode === CanvasMode.IDLE) {
+			clearInterval(resizeCanvasTimeout);
+			resizeCanvasTimeout = setTimeout(handleResize, 100) as unknown as number;
+		} else {
+			handleResize();
+		}
+	}
+
 	async function handleResize() {
 		const dpr = window.devicePixelRatio;
 		const width = window.innerWidth;
@@ -135,6 +145,7 @@
 	}
 
 	async function handlePointer(e: PointerEvent) {
+		if (mode === CanvasMode.IDLE) return;
 		const x = e.pageX;
 		const y = e.pageY;
 
@@ -152,6 +163,7 @@
 
 	let saveCanvasTimeout: number | undefined = undefined;
 	async function handlePointerUp() {
+		if (mode === CanvasMode.IDLE) return;
 		if (mode === CanvasMode.DRAW && points.length > 0) {
 			// Translate the points to the canvas bounds, enabling the canvas to resized without displacing the doodle
 			const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);
@@ -198,7 +210,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKey} onresize={handleResize} />
+<svelte:window onkeydown={handleKey} onresize={scheduleHandleResize} />
 <div class="wrapper" class:hidden={mode === CanvasMode.IDLE}>
 	<canvas
 		bind:this={canvas}
@@ -243,7 +255,7 @@
 		z-index: -5;
 		opacity: 0.05;
 
-		pointer-events: none;
+		pointer-events: none !important;
 		background: none !important;
 		border: none !important;
 	}
