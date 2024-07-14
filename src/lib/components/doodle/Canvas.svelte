@@ -101,7 +101,8 @@
 
 	async function handleResize() {
 		const dpr = window.devicePixelRatio;
-		const width = window.innerWidth;
+		// Workaround due to finicky overflow scroll behaviour on chromium
+		const width = dots.clientWidth - 0.5;
 		// Where 80 is the top margin of the body
 		const height = document.body.scrollHeight + 80;
 
@@ -198,7 +199,9 @@
 	}
 
 	async function saveCanvas(paths: Path[]) {
+		paths = paths.filter((path) => path.points.length > 0);
 		if (paths.length >= STORAGE_MAX_PATHS) paths = paths.slice(-STORAGE_MAX_PATHS);
+
 		localStorage.setItem(STORAGE_KEY + $page.url.pathname, JSON.stringify(paths));
 	}
 </script>
