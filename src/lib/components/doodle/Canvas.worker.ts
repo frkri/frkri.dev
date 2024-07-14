@@ -25,7 +25,6 @@ let paths: Path[] = [];
 
 addEventListener('message', async (e) => {
 	const { type, data } = e.data;
-
 	switch (type) {
 		case 'init': {
 			canvas = data.canvas;

@@ -15,7 +15,7 @@
 	const DOTS_SIZE = 3;
 	const DOTS_SHOW_RADIUS = 300;
 
-	const CANVAS_MAX_WIDTH = 4500;
+	const CANVAS_MAX_WIDTH = 5500;
 	let canvasLeftEdge: number = $state(0);
 	let canvasRightEdge: number = $state(0);
 
@@ -24,6 +24,7 @@
 	let worker: Worker;
 
 	let { mode, color }: { mode: CanvasMode; color: string } = $props();
+	let previousMode = mode;
 	let pencilRadius = $state(PENCIL_DEFAULT_RADIUS);
 	let strokeStyle: StrokeOptions = $derived({
 		size: pencilRadius * 2,
@@ -41,36 +42,53 @@
 	$effect(() => {
 		if (!worker) {
 			const offscreenCanvas = canvas.transferControlToOffscreen();
-			worker = new CanvasWorker();
+			worker = setupWorker(offscreenCanvas);
 
-			worker.onmessage = (e) => {
-				const { type, data } = e.data;
-				switch (type) {
-					case 'saveCanvas':
-						saveCanvas(data.paths);
-						break;
-					default:
-						console.warn(`Unhandled message type on main: ${type}`);
-				}
-			};
-			worker.postMessage({ type: 'init', data: { canvas: offscreenCanvas } }, [offscreenCanvas]);
-
-			// Load the saved canvas
-			const paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
-			worker.postMessage({ type: 'updatePaths', data: { paths } });
+			handleResize();
+			return;
 		}
-
-		// Will indirectly redraw the canvas
-		handleResize();
 	});
 
 	$effect(() => {
+		// Rerender the canvas without the placeholder doodles
+		if (previousMode === CanvasMode.ERASE) handleResize();
+		previousMode = mode;
+	});
+
+	$effect(() => {
+		// Update the worker with the new state changes
 		if (worker)
 			worker.postMessage({
 				type: 'updateState',
 				data: { mode, pencilRadius, color, strokeStyle, canvasLeftEdge }
 			});
 	});
+
+	$effect(() => {
+		// Resize the cursor based on the pencil radius
+		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") 60 60, auto`;
+	});
+
+	function setupWorker(offscreenCanvas: OffscreenCanvas): Worker {
+		const worker = new CanvasWorker();
+		worker.onmessage = async (e) => {
+			const { type, data } = e.data;
+			switch (type) {
+				case 'saveCanvas':
+					saveCanvas(data.paths);
+					break;
+				default:
+					console.warn(`Unhandled message type on main: ${type}`);
+			}
+		};
+		worker.postMessage({ type: 'init', data: { canvas: offscreenCanvas } }, [offscreenCanvas]);
+
+		// Load the saved canvas
+		const paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
+		worker.postMessage({ type: 'updatePaths', data: { paths } });
+
+		return worker;
+	}
 
 	let resizeCanvasTimeout: number | undefined = undefined;
 	async function scheduleHandleResize() {
@@ -88,9 +106,6 @@
 		// Where 80 is the top margin of the body
 		const height = document.body.scrollHeight + 80;
 
-		// Resize the cursor based on the pencil radius and device pixel ratio
-		canvas.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${PENCIL_MAX_RADIUS * 4}' height='${PENCIL_MAX_RADIUS * 4}' fill='${mode === CanvasMode.DRAW ? color.replace('#', '%23') : '%23FFFFFF'}AA'><circle cx='${(PENCIL_MAX_RADIUS * 4) / 2}' cy='${(PENCIL_MAX_RADIUS * 4) / 2}' r='${pencilRadius * window.devicePixelRatio}'></circle></svg>") 60 60, auto`;
-
 		// Dots size
 		dots.style.height = height + 'px';
 
@@ -99,22 +114,19 @@
 		canvas.style.height = height + 'px';
 		worker.postMessage({ type: 'resizeCanvas', data: { width, height, dpr } });
 
-		// Wait for the dom to update
-		tick().then(() => {
-			// Canvas bounds
-			const windowMiddle = window.innerWidth / 2;
-			canvasLeftEdge = windowMiddle - CANVAS_MAX_WIDTH / 2;
-			canvasRightEdge = windowMiddle + CANVAS_MAX_WIDTH / 2;
+		// Canvas bounds
+		const windowMiddle = window.innerWidth / 2;
+		canvasLeftEdge = windowMiddle - CANVAS_MAX_WIDTH / 2;
+		canvasRightEdge = windowMiddle + CANVAS_MAX_WIDTH / 2;
 
-			// Redraw and reset the canvas
-			worker.postMessage({
-				type: 'updatePoints',
-				data: {
-					points: []
-				}
-			});
-			redrawCanvas();
+		// Redraw and reset the canvas
+		worker.postMessage({
+			type: 'updatePoints',
+			data: {
+				points: []
+			}
 		});
+		redrawCanvas();
 	}
 
 	async function redrawCanvas(deletedPaths?: Path[]) {
