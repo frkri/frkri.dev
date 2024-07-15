@@ -1,45 +1,72 @@
 <script lang="ts">
-	import { Eraser, Pencil, X } from 'lucide-svelte';
+	import { PENCIL_MAX_RADIUS, PENCIL_MIN_RADIUS, PENCIL_DEFAULT_RADIUS } from './Canvas';
+	import { Eraser, Pencil, X, CircleHelp } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
 
 	let {
-		isOpen,
 		mode = $bindable(),
-		color = $bindable()
-	}: { isOpen?: boolean; mode: CanvasMode; color: string } = $props();
+		color = $bindable(),
+		pencilRadius = $bindable()
+	}: { mode: CanvasMode; color: string; pencilRadius: number } = $props();
 
-	function close() {
-		isOpen = false;
-		mode = CanvasMode.IDLE;
+	async function handleKey(e: KeyboardEvent) {
+		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
+
+		switch (e.key) {
+			case 'Escape':
+				mode = CanvasMode.IDLE;
+				break;
+			case '+':
+				pencilRadius = Math.min(pencilRadius + 1, PENCIL_MAX_RADIUS);
+				break;
+			case '-':
+				pencilRadius = Math.max(pencilRadius - 1, PENCIL_MIN_RADIUS);
+				break;
+			case '=':
+				pencilRadius = PENCIL_DEFAULT_RADIUS;
+				break;
+		}
 	}
 </script>
 
-<svelte:window
-	on:keydown={(e) => {
-		if (e.key === 'Escape') close();
-	}}
-/>
+<svelte:window on:keydown={handleKey} />
 
-<menu id="toolbar" class:inactive={!isOpen}>
+{#if mode !== CanvasMode.IDLE}
+	<menu id="left">
+		<label title="Pencil radius" class:limit-max={pencilRadius === PENCIL_MAX_RADIUS}>
+			<input
+				type="range"
+				min={PENCIL_MIN_RADIUS}
+				max={PENCIL_MAX_RADIUS}
+				bind:value={pencilRadius}
+			/>
+			<span onclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}>{pencilRadius}</span>
+		</label>
+		<button title="Help">
+			<CircleHelp size="30px" absoluteStrokeWidth={true} />
+		</button>
+	</menu>
+{/if}
+
+<menu id="right" class:inactive={mode === CanvasMode.IDLE}>
 	{#if mode !== CanvasMode.DRAW}
-		<button
-			onclick={() => {
-				isOpen = true;
-				mode = CanvasMode.DRAW;
-			}}
-		>
+		<button title="Pencil" onclick={() => (mode = CanvasMode.DRAW)}>
 			<Pencil size="30px" absoluteStrokeWidth={true} />
 		</button>
 	{:else}
-		<label class="selected color-wrap">
+		<label title="Color selection" class="selected color-wrap">
 			<input type="color" title="Pencil color" bind:value={color} />
 		</label>
 	{/if}
-	{#if isOpen}
-		<button class:selected={mode === CanvasMode.ERASE} onclick={() => (mode = CanvasMode.ERASE)}>
+	{#if mode !== CanvasMode.IDLE}
+		<button
+			title="Eraser"
+			class:selected={mode === CanvasMode.ERASE}
+			onclick={() => (mode = CanvasMode.ERASE)}
+		>
 			<Eraser size="30px" absoluteStrokeWidth={true} />
 		</button>
-		<button onclick={close}>
+		<button title="Close" onclick={() => (mode = CanvasMode.IDLE)}>
 			<X size="30px" absoluteStrokeWidth={true} />
 		</button>
 	{/if}
@@ -55,25 +82,132 @@
 		background-color: var(--background-secondary);
 	}
 
+	.limit-max {
+		&:hover,
+		&:focus {
+			color: #e28080 !important;
+		}
+	}
+
+	#left {
+		gap: 0.4rem;
+		flex-direction: column;
+		left: 0.8em;
+
+		background-color: transparent;
+		border-color: transparent;
+
+		& > * {
+			border-radius: 0.2rem;
+			border-style: solid;
+			border-width: 1.5px;
+			width: 3rem;
+
+			border-color: var(--background-tertiary);
+			background-color: var(--background-primary);
+		}
+
+		& label {
+			display: flex;
+			flex-direction: column;
+
+			& span {
+				width: 2rem;
+				height: 2rem;
+
+				font-size: 1rem;
+				font-weight: 600;
+			}
+
+			& input {
+				height: 0rem;
+				width: min-content;
+
+				margin: 0px;
+				padding: 0px;
+				opacity: 0;
+
+				writing-mode: vertical-lr;
+				direction: rtl;
+
+				accent-color: var(--text-secondary);
+
+				&:hover,
+				&:focus {
+					height: 8rem;
+					margin: 0.6rem 0px;
+
+					opacity: 1;
+				}
+			}
+		}
+
+		@media screen and (max-height: 250px) and (min-width: 300px) {
+			flex-direction: row;
+
+			& label {
+				flex-direction: row;
+				flex-flow: row-reverse;
+				width: fit-content;
+
+				& input {
+					height: fit-content;
+					width: 0rem;
+
+					writing-mode: horizontal-tb;
+					direction: initial;
+
+					&:hover,
+					&:focus {
+						height: min-content;
+						width: min-content;
+
+						margin: 0px;
+					}
+				}
+			}
+		}
+
+		@media screen and (max-height: 250px) {
+			& button {
+				display: none;
+			}
+		}
+	}
+
+	#right {
+		right: 0.8em;
+
+		border-color: var(--background-tertiary);
+		background-color: var(--background-primary);
+
+		& :first-child {
+			border-top-left-radius: 0.15rem;
+			border-bottom-left-radius: 0.15rem;
+		}
+
+		& :last-child {
+			border-top-right-radius: 0.15rem;
+			border-bottom-right-radius: 0.15rem;
+		}
+	}
+
 	menu {
 		display: flex;
 		justify-content: space-between;
+		flex-direction: row;
 		align-items: center;
 		z-index: 2;
 
 		position: fixed;
 		bottom: 0.8em;
-		right: 0.8em;
 
 		margin: 0px;
 		padding: 0px;
 
 		border-radius: 0.2rem;
 		border-style: solid;
-		border-width: 1px;
-
-		border-color: var(--background-tertiary);
-		background-color: var(--background-primary);
+		border-width: 1.5px;
 
 		& * {
 			display: flex;
@@ -84,7 +218,7 @@
 			padding: 0.4rem;
 
 			transition-property: all;
-			transition: 150ms ease-in-out;
+			transition: 100ms ease-in-out;
 		}
 
 		& button {
@@ -96,14 +230,8 @@
 			}
 		}
 
-		& :first-child {
-			border-top-left-radius: 0.15rem;
-			border-bottom-left-radius: 0.15rem;
-		}
-
-		& :last-child {
-			border-top-right-radius: 0.15rem;
-			border-bottom-right-radius: 0.15rem;
+		@media screen and (max-width: 300px) {
+			flex-direction: column;
 		}
 	}
 

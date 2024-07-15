@@ -1,5 +1,21 @@
 import { getStroke, type StrokeOptions } from 'perfect-freehand';
 
+export const STORAGE_KEY = 'doodle';
+export const STORAGE_MAX_PATHS = 4000;
+
+export const PENCIL_MAX_RADIUS = 30;
+export const PENCIL_MIN_RADIUS = 1;
+export const PENCIL_DEFAULT_RADIUS = 5;
+
+export const DOTS_SIZE = 3;
+export const DOTS_SHOW_RADIUS = 300;
+
+export const CANVAS_MAX_WIDTH = 5500;
+export const CANVAS_MAX_HEIGHT = 5500;
+
+export const CANVAS_RESIZE_TIMEOUT = 50;
+export const STORAGE_SAVE_TIMEOUT = 1000;
+
 // As per https://github.com/steveruizok/perfect-freehand
 const average = (a: number, b: number) => (a + b) / 2;
 
@@ -31,7 +47,7 @@ export function getSvgPathFromStroke(points: number[][], closed = true) {
 	return result;
 }
 
-export function getPath(points: number[][], strokeStyle: StrokeOptions) {
+export function getPath2D(points: number[][], strokeStyle: StrokeOptions) {
 	const stroke = getStroke(points, strokeStyle);
 	const svgPath = getSvgPathFromStroke(stroke);
 	return new Path2D(svgPath);

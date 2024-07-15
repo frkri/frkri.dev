@@ -3,19 +3,17 @@
 	import { type StrokeOptions } from 'perfect-freehand';
 	import { page } from '$app/stores';
 	import CanvasWorker from './Canvas.worker?worker';
+	import {
+		CANVAS_MAX_HEIGHT,
+		CANVAS_MAX_WIDTH,
+		CANVAS_RESIZE_TIMEOUT,
+		DOTS_SHOW_RADIUS,
+		DOTS_SIZE,
+		PENCIL_MAX_RADIUS,
+		STORAGE_KEY,
+		STORAGE_MAX_PATHS
+	} from './Canvas';
 
-	const STORAGE_KEY = 'doodle';
-	const STORAGE_MAX_PATHS = 4000;
-
-	const PENCIL_MAX_RADIUS = 30;
-	const PENCIL_MIN_RADIUS = 1;
-	const PENCIL_DEFAULT_RADIUS = 5;
-
-	const DOTS_SIZE = 3;
-	const DOTS_SHOW_RADIUS = 300;
-
-	const CANVAS_MAX_WIDTH = 5500;
-	const CANVAS_MAX_HEIGHT = 5500;
 	let canvasLeftEdge: number = $state(0);
 	let canvasRightEdge: number = $state(0);
 
@@ -23,9 +21,9 @@
 	let dots: HTMLDivElement;
 	let worker: Worker;
 
-	let { mode, color }: { mode: CanvasMode; color: string } = $props();
+	let { mode, color, pencilRadius }: { mode: CanvasMode; color: string; pencilRadius: number } =
+		$props();
 	let previousMode = mode;
-	let pencilRadius = $state(PENCIL_DEFAULT_RADIUS);
 	let strokeStyle: StrokeOptions = $derived({
 		size: pencilRadius * 2,
 		thinning: 0.5,
@@ -94,7 +92,7 @@
 	async function scheduleHandleResize() {
 		if (mode === CanvasMode.IDLE) {
 			clearInterval(resizeCanvasTimeout);
-			resizeCanvasTimeout = setTimeout(handleResize, 50) as unknown as number;
+			resizeCanvasTimeout = setTimeout(handleResize, CANVAS_RESIZE_TIMEOUT) as unknown as number;
 		} else {
 			handleResize();
 		}
@@ -138,21 +136,6 @@
 			type: 'redrawCanvas',
 			data: { strokeStyle, canvasLeftEdge, deletedPaths }
 		});
-	}
-
-	async function handleKey(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
-		switch (e.key) {
-			case '+':
-				pencilRadius = Math.min(pencilRadius + 1, PENCIL_MAX_RADIUS);
-				break;
-			case '-':
-				pencilRadius = Math.max(pencilRadius - 1, PENCIL_MIN_RADIUS);
-				break;
-			case '=':
-				pencilRadius = PENCIL_DEFAULT_RADIUS;
-				break;
-		}
 	}
 
 	async function handlePointer(e: PointerEvent) {
@@ -208,7 +191,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKey} onresize={scheduleHandleResize} />
+<svelte:window onresize={scheduleHandleResize} />
 <div class="wrapper" class:hidden={mode === CanvasMode.IDLE}>
 	<canvas
 		bind:this={canvas}
@@ -251,7 +234,7 @@
 
 	.hidden * {
 		z-index: -5;
-		opacity: 0.05;
+		opacity: 0.1;
 
 		pointer-events: none !important;
 		background: none !important;

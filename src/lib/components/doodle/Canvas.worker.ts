@@ -1,8 +1,6 @@
 import { CanvasMode, type Path } from '$lib/types/doodle';
-import type { StrokeOptions } from 'perfect-freehand';
-import { getPath } from './Canvas';
-
-const STORAGE_SAVE_TIMEOUT = 1000;
+import { type StrokeOptions } from 'perfect-freehand';
+import { getPath2D, STORAGE_SAVE_TIMEOUT } from './Canvas';
 
 let canvas: OffscreenCanvas;
 let ctx: OffscreenCanvasRenderingContext2D;
@@ -109,7 +107,7 @@ async function redrawCanvas(
 			y,
 			pressure
 		]);
-		const path = getPath(pathPoints, localStrokeStyle);
+		const path = getPath2D(pathPoints, localStrokeStyle);
 
 		if (deletedPaths) {
 			ctx.globalCompositeOperation = 'destination-out';
@@ -129,7 +127,7 @@ async function updateCanvas(x: number, y: number, pressure: number) {
 
 		// Draw or erase the canvas based on the mouse position
 		points.push([x, y, pressure]);
-		const path = getPath(points, strokeStyle);
+		const path = getPath2D(points, strokeStyle);
 
 		ctx.fillStyle = color;
 		ctx.fill(path);

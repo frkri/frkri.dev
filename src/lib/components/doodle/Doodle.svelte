@@ -3,8 +3,9 @@
 	import Canvas from './Canvas.svelte';
 	import ToolBar from './ToolBar.svelte';
 
-	let mode = $state(CanvasMode.IDLE);
+	let mode = $state(CanvasMode.DRAW);
 	let color = $state('#FFFFFF');
+	let pencilRadius = $state(5);
 </script>
 
 <div id="doodle">
@@ -16,6 +17,6 @@
 		</style>
 	</noscript>
 
-	<Canvas {mode} {color} />
-	<ToolBar bind:mode bind:color />
+	<Canvas {mode} {color} {pencilRadius} />
+	<ToolBar bind:mode bind:color bind:pencilRadius />
 </div>
