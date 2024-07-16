@@ -10,9 +10,16 @@
 		pencilRadius = $bindable()
 	}: { worker: Worker; mode: CanvasMode; color: string; pencilRadius: number } = $props();
 	let pencilRadiusInput: HTMLInputElement | null = $state(null);
+	let altMode = false;
 
-	async function handleKey(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.ctrlKey || e.shiftKey) return;
+	function handleKeyDown(e: KeyboardEvent) {
+		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
+
+		// Keyboard specific actions
+		if (e.key === 'Shift') {
+			handleAltMode(true);
+			return;
+		}
 
 		switch (e.key) {
 			case 'Escape':
@@ -30,13 +37,31 @@
 		}
 	}
 
+	function handleKeyUp(e: KeyboardEvent) {
+		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
+
+		// Keyboard specific actions
+		if (e.key === 'Shift') handleAltMode(false);
+	}
+
+	async function handleAltMode(isActive: boolean) {
+		if (isActive && !altMode) {
+			mode = mode === CanvasMode.DRAW ? CanvasMode.ERASE : CanvasMode.DRAW;
+			altMode = true;
+		} else if (!isActive && altMode) {
+			mode = mode === CanvasMode.DRAW ? CanvasMode.ERASE : CanvasMode.DRAW;
+			altMode = false;
+		}
+	}
+
 	async function handleFocus() {
 		if (!pencilRadiusInput) return;
+		pencilRadiusInput.focus();
 		pencilRadiusInput.select();
 	}
 </script>
 
-<svelte:window on:keydown={handleKey} />
+<svelte:window onkeydown={handleKeyDown} onkeyup={handleKeyUp} />
 
 {#if mode !== CanvasMode.IDLE}
 	<menu id="left">
@@ -142,7 +167,7 @@
 			& button {
 				display: flex;
 				flex-direction: column;
-				justify-content: center;
+				justify-content: space-between;
 				align-items: center;
 
 				width: 2rem;
@@ -173,7 +198,6 @@
 				&:focus {
 					width: 100%;
 					height: 8rem;
-					margin: 0.4rem 0px;
 
 					opacity: 1;
 				}
@@ -200,8 +224,19 @@
 					&:focus {
 						height: min-content;
 						width: 100%;
+					}
+				}
 
-						margin: 0px;
+				& button {
+					flex-direction: row;
+					flex-flow: row-reverse;
+
+					height: min-content;
+					min-width: 3.2rem;
+					padding: 0px;
+
+					& :global(.lucide-chevron-up) {
+						transform: rotate(90deg);
 					}
 				}
 			}
