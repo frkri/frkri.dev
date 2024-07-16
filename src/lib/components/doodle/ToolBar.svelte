@@ -8,6 +8,7 @@
 		color = $bindable(),
 		pencilRadius = $bindable()
 	}: { mode: CanvasMode; color: string; pencilRadius: number } = $props();
+	let pencilRadiusInput: HTMLInputElement | null = $state(null);
 
 	async function handleKey(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
@@ -38,9 +39,13 @@
 				type="range"
 				min={PENCIL_MIN_RADIUS}
 				max={PENCIL_MAX_RADIUS}
+				bind:this={pencilRadiusInput}
 				bind:value={pencilRadius}
 			/>
-			<button ondblclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}>
+			<button
+				ondblclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}
+				onclick={() => pencilRadiusInput?.focus()}
+			>
 				{pencilRadius}
 			</button>
 		</label>
@@ -113,13 +118,16 @@
 			display: flex;
 			flex-direction: column;
 
-			&:hover button {
+			&:hover button,
+			&:focus button {
 				color: #ffffff;
 			}
 
 			& button {
 				width: 2rem;
 				height: 2rem;
+
+				user-select: none;
 
 				font-size: 1rem;
 				font-weight: 600;
@@ -135,11 +143,13 @@
 
 				writing-mode: vertical-lr;
 				direction: rtl;
+				touch-action: none;
 
 				accent-color: var(--text-secondary);
 
 				&:hover,
 				&:focus {
+					width: 100%;
 					height: 8rem;
 					margin: 0.6rem 0px;
 
