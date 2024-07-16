@@ -1,6 +1,6 @@
 import { CanvasMode, type Path } from '$lib/types/doodle';
 import { type StrokeOptions } from 'perfect-freehand';
-import { getPath2D, STORAGE_SAVE_TIMEOUT } from './Canvas';
+import { getPath2D, PENCIL_DEFAULT_RADIUS, STORAGE_SAVE_TIMEOUT } from './Canvas';
 
 let canvas: OffscreenCanvas;
 let ctx: OffscreenCanvasRenderingContext2D;
@@ -8,9 +8,15 @@ let ctx: OffscreenCanvasRenderingContext2D;
 let mode: CanvasMode;
 let color: string;
 
-let pencilRadius: number;
-let strokeStyle: StrokeOptions;
+let pencilRadius: number = PENCIL_DEFAULT_RADIUS;
 let canvasLeftEdge: number;
+let strokeStyle: StrokeOptions = {
+	size: pencilRadius * 2,
+	thinning: 0.8,
+	smoothing: 0.8,
+	streamline: 0.8,
+	simulatePressure: false
+};
 
 /**
  * Current temporary points that are being drawn on the canvas
@@ -40,14 +46,18 @@ addEventListener('message', async (e) => {
 				mode: localMode,
 				color: localColor,
 				pencilRadius: localPencilRadius,
-				strokeStyle: localStrokeStyle,
 				canvasLeftEdge: localCanvasLeftEdge
 			} = data;
 			if (localMode) mode = localMode;
 			if (localColor) color = localColor;
-			if (localPencilRadius) pencilRadius = localPencilRadius;
-			if (localStrokeStyle) strokeStyle = localStrokeStyle;
 			if (localCanvasLeftEdge) canvasLeftEdge = localCanvasLeftEdge;
+			if (localPencilRadius) {
+				pencilRadius = localPencilRadius;
+				strokeStyle = {
+					...strokeStyle,
+					size: pencilRadius * 2
+				};
+			}
 			break;
 		}
 
@@ -65,7 +75,7 @@ addEventListener('message', async (e) => {
 
 		case 'undoPath': {
 			const path = paths.pop();
-			if (path) redrawCanvas(strokeStyle, canvasLeftEdge, [path]);
+			if (path) redrawCanvas(canvasLeftEdge, [path]);
 			break;
 		}
 
@@ -78,8 +88,15 @@ addEventListener('message', async (e) => {
 		}
 
 		case 'redrawCanvas': {
-			const { strokeStyle, canvasLeftEdge, deletedPaths } = data;
-			redrawCanvas(strokeStyle, canvasLeftEdge, deletedPaths);
+			const { canvasLeftEdge, deletedPaths } = data;
+			redrawCanvas(canvasLeftEdge, deletedPaths);
+			break;
+		}
+
+		case 'fullyRedrawCanvas': {
+			const { canvasLeftEdge } = data;
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			redrawCanvas(canvasLeftEdge);
 			break;
 		}
 
@@ -89,8 +106,8 @@ addEventListener('message', async (e) => {
 			break;
 		}
 
-		case 'handlePointerUp': {
-			handlePointerUp();
+		case 'handlePathEnd': {
+			handlePathEnd();
 			break;
 		}
 
@@ -99,11 +116,7 @@ addEventListener('message', async (e) => {
 	}
 });
 
-async function redrawCanvas(
-	strokeStyle: StrokeOptions,
-	canvasLeftEdge: number,
-	deletedPaths?: Path[]
-) {
+async function redrawCanvas(canvasLeftEdge: number, deletedPaths?: Path[]) {
 	// Either redraw all the paths or the given deleted paths only
 	const selectedPaths = deletedPaths || paths;
 	selectedPaths.forEach((localPath) => {
@@ -130,10 +143,12 @@ async function updateCanvas(x: number, y: number, pressure: number) {
 	if (mode === CanvasMode.DRAW) {
 		// Limit the number of points to 50
 		if (points.length > 1500) points = [];
+		// Needed due to bug with simulating pressure being disabled
+		const localStrokeStyle = points.length === 1 ? { ...strokeStyle, size: 0.1 } : strokeStyle;
 
 		// Draw or erase the canvas based on the mouse position
 		points.push([x, y, pressure]);
-		const path = getPath2D(points, strokeStyle);
+		const path = getPath2D(points, localStrokeStyle);
 
 		ctx.fillStyle = color;
 		ctx.fill(path);
@@ -149,12 +164,12 @@ async function updateCanvas(x: number, y: number, pressure: number) {
 
 		if (overlappingPaths.length === 0) return;
 		paths = paths.filter((path) => !overlappingPaths.includes(path));
-		redrawCanvas(strokeStyle, canvasLeftEdge, overlappingPaths);
+		redrawCanvas(canvasLeftEdge, overlappingPaths);
 	}
 }
 
 let saveCanvasTimeout: number | undefined = undefined;
-async function handlePointerUp() {
+async function handlePathEnd() {
 	if (mode === CanvasMode.DRAW && points.length > 0) {
 		// Translate the points to the canvas bounds, enabling the canvas to resized without displacing the doodle
 		const transformedPoints = points.map(([x, y, pressure]) => [x - canvasLeftEdge, y, pressure]);

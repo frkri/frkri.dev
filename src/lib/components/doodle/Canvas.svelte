@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { CanvasMode, type Path } from '$lib/types/doodle';
-	import { type StrokeOptions } from 'perfect-freehand';
 	import { page } from '$app/stores';
 	import {
 		CANVAS_MAX_HEIGHT,
@@ -25,18 +24,6 @@
 		pencilRadius
 	}: { worker: Worker; mode: CanvasMode; color: string; pencilRadius: number } = $props();
 	let previousMode = mode;
-	let strokeStyle: StrokeOptions = $derived({
-		size: pencilRadius * 2,
-		thinning: 0.5,
-		smoothing: 0.8,
-		streamline: 0.8,
-		start: {
-			cap: true
-		},
-		end: {
-			cap: true
-		}
-	});
 
 	let isSetup = false;
 	$effect(() => {
@@ -52,7 +39,20 @@
 
 	$effect(() => {
 		// Rerender the canvas without the removed placeholder doodles
-		if (previousMode === CanvasMode.ERASE) handleResize();
+		if (previousMode === CanvasMode.ERASE)
+			worker.postMessage({
+				type: 'fullyRedrawCanvas',
+				data: { canvasLeftEdge }
+			});
+
+		// On any mode change, end the current path
+		worker.postMessage({
+			type: 'handlePathEnd',
+			data: {
+				mode
+			}
+		});
+
 		previousMode = mode;
 	});
 
@@ -61,7 +61,7 @@
 		if (worker)
 			worker.postMessage({
 				type: 'updateState',
-				data: { mode, pencilRadius, color, strokeStyle, canvasLeftEdge }
+				data: { mode, pencilRadius, color, canvasLeftEdge }
 			});
 
 		// Resize the cursor based on the pencil radius
@@ -133,7 +133,7 @@
 	async function redrawCanvas(deletedPaths?: Path[]) {
 		worker.postMessage({
 			type: 'redrawCanvas',
-			data: { strokeStyle, canvasLeftEdge, deletedPaths }
+			data: { canvasLeftEdge, deletedPaths }
 		});
 	}
 
@@ -157,7 +157,7 @@
 	async function handlePointerUp() {
 		if (mode === CanvasMode.IDLE) return;
 		worker.postMessage({
-			type: 'handlePointerUp',
+			type: 'handlePathEnd',
 			data: {
 				mode
 			}
