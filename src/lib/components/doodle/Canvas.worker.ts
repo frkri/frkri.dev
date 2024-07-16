@@ -64,10 +64,8 @@ addEventListener('message', async (e) => {
 		}
 
 		case 'undoPath': {
-			if (paths.pop() === undefined) return;
-
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			redrawCanvas(strokeStyle, canvasLeftEdge);
+			const path = paths.pop();
+			if (path) redrawCanvas(strokeStyle, canvasLeftEdge, [path]);
 			break;
 		}
 

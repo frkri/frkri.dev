@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PENCIL_MAX_RADIUS, PENCIL_MIN_RADIUS, PENCIL_DEFAULT_RADIUS } from './Canvas';
-	import { Eraser, Pencil, X, CircleHelp, Undo2 } from 'lucide-svelte';
+	import { Eraser, Pencil, X, CircleHelp, Undo2, ChevronUp } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
 
 	let {
@@ -29,24 +29,32 @@
 				break;
 		}
 	}
+
+	async function handleFocus() {
+		if (!pencilRadiusInput) return;
+		pencilRadiusInput.select();
+	}
 </script>
 
 <svelte:window on:keydown={handleKey} />
 
 {#if mode !== CanvasMode.IDLE}
 	<menu id="left">
-		<label class:limit-max={pencilRadius === PENCIL_MAX_RADIUS} title="Pencil radius">
+		<label
+			class:limit-max={pencilRadius === PENCIL_MAX_RADIUS}
+			onmouseover={handleFocus}
+			onfocus={handleFocus}
+			title="Pencil radius"
+		>
 			<input
 				type="range"
 				min={PENCIL_MIN_RADIUS}
 				max={PENCIL_MAX_RADIUS}
-				bind:this={pencilRadiusInput}
 				bind:value={pencilRadius}
+				bind:this={pencilRadiusInput}
 			/>
-			<button
-				ondblclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}
-				onclick={() => pencilRadiusInput?.focus()}
-			>
+			<button ondblclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}>
+				<ChevronUp size="30px" absoluteStrokeWidth={true} />
 				{pencilRadius}
 			</button>
 		</label>
@@ -67,16 +75,19 @@
 		</label>
 	{/if}
 	{#if mode !== CanvasMode.IDLE}
-		<button
-			title="Eraser"
-			class:selected={mode === CanvasMode.ERASE}
-			onclick={() => (mode = CanvasMode.ERASE)}
-		>
-			<Eraser size="30px" absoluteStrokeWidth={true} />
-		</button>
-		<button title="Undo" onclick={() => worker.postMessage({ type: 'undoPath' })}>
-			<Undo2 size="30px" absoluteStrokeWidth={true} />
-		</button>
+		{#if mode === CanvasMode.ERASE}
+			<button
+				class="selected"
+				title="Undo"
+				onclick={() => worker.postMessage({ type: 'undoPath' })}
+			>
+				<Undo2 size="30px" absoluteStrokeWidth={true} />
+			</button>
+		{:else}
+			<button title="Eraser" onclick={() => (mode = CanvasMode.ERASE)}>
+				<Eraser size="30px" absoluteStrokeWidth={true} />
+			</button>
+		{/if}
 		<button title="Close" onclick={() => (mode = CanvasMode.IDLE)}>
 			<X size="30px" absoluteStrokeWidth={true} />
 		</button>
@@ -129,8 +140,14 @@
 			}
 
 			& button {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+
 				width: 2rem;
-				height: 2rem;
+				height: 3.5rem;
+				padding-top: 0px;
 
 				user-select: none;
 
@@ -156,7 +173,7 @@
 				&:focus {
 					width: 100%;
 					height: 8rem;
-					margin: 0.6rem 0px;
+					margin: 0.4rem 0px;
 
 					opacity: 1;
 				}
