@@ -3,7 +3,7 @@
 	import Canvas from './Canvas.svelte';
 	import ToolBar from './ToolBar.svelte';
 
-	let mode = $state(CanvasMode.DRAW);
+	let mode = $state(CanvasMode.IDLE);
 	let color = $state('#FFFFFF');
 	let pencilRadius = $state(5);
 </script>

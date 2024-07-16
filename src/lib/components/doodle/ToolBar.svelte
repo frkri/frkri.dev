@@ -33,14 +33,16 @@
 
 {#if mode !== CanvasMode.IDLE}
 	<menu id="left">
-		<label title="Pencil radius" class:limit-max={pencilRadius === PENCIL_MAX_RADIUS}>
+		<label class:limit-max={pencilRadius === PENCIL_MAX_RADIUS} title="Pencil radius">
 			<input
 				type="range"
 				min={PENCIL_MIN_RADIUS}
 				max={PENCIL_MAX_RADIUS}
 				bind:value={pencilRadius}
 			/>
-			<span onclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}>{pencilRadius}</span>
+			<button ondblclick={() => (pencilRadius = PENCIL_DEFAULT_RADIUS)}>
+				{pencilRadius}
+			</button>
 		</label>
 		<button title="Help">
 			<CircleHelp size="30px" absoluteStrokeWidth={true} />
@@ -83,9 +85,9 @@
 	}
 
 	.limit-max {
-		&:hover,
-		&:focus {
-			color: #e28080 !important;
+		&:hover button,
+		&:focus button {
+			color: #df9292 !important;
 		}
 	}
 
@@ -111,7 +113,11 @@
 			display: flex;
 			flex-direction: column;
 
-			& span {
+			&:hover button {
+				color: #ffffff;
+			}
+
+			& button {
 				width: 2rem;
 				height: 2rem;
 
@@ -144,6 +150,7 @@
 
 		@media screen and (max-height: 250px) and (min-width: 300px) {
 			flex-direction: row;
+			flex-flow: row-reverse;
 
 			& label {
 				flex-direction: row;
@@ -168,8 +175,8 @@
 			}
 		}
 
-		@media screen and (max-height: 250px) {
-			& button {
+		@media screen and (max-height: 250px) and (max-width: 450px) {
+			& > button {
 				display: none;
 			}
 		}
@@ -217,7 +224,6 @@
 			border: none;
 			padding: 0.4rem;
 
-			transition-property: all;
 			transition: 100ms ease-in-out;
 		}
 

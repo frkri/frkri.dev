@@ -48,7 +48,7 @@
 	});
 
 	$effect(() => {
-		// Rerender the canvas without the placeholder doodles
+		// Rerender the canvas without the removed placeholder doodles
 		if (previousMode === CanvasMode.ERASE) handleResize();
 		previousMode = mode;
 	});
@@ -60,9 +60,7 @@
 				type: 'updateState',
 				data: { mode, pencilRadius, color, strokeStyle, canvasLeftEdge }
 			});
-	});
 
-	$effect(() => {
 		// Resize the cursor based on the pencil radius
 		updateCursor(mode, pencilRadius, color);
 	});
