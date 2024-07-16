@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { PENCIL_MAX_RADIUS, PENCIL_MIN_RADIUS, PENCIL_DEFAULT_RADIUS } from './Canvas';
-	import { Eraser, Pencil, X, CircleHelp } from 'lucide-svelte';
+	import { Eraser, Pencil, X, CircleHelp, Undo2 } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
 
 	let {
+		worker,
 		mode = $bindable(),
 		color = $bindable(),
 		pencilRadius = $bindable()
-	}: { mode: CanvasMode; color: string; pencilRadius: number } = $props();
+	}: { worker: Worker; mode: CanvasMode; color: string; pencilRadius: number } = $props();
 	let pencilRadiusInput: HTMLInputElement | null = $state(null);
 
 	async function handleKey(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
+		if (mode === CanvasMode.IDLE || e.ctrlKey || e.shiftKey) return;
 
 		switch (e.key) {
 			case 'Escape':
@@ -73,6 +74,9 @@
 		>
 			<Eraser size="30px" absoluteStrokeWidth={true} />
 		</button>
+		<button title="Undo" onclick={() => worker.postMessage({ type: 'undoPath' })}>
+			<Undo2 size="30px" absoluteStrokeWidth={true} />
+		</button>
 		<button title="Close" onclick={() => (mode = CanvasMode.IDLE)}>
 			<X size="30px" absoluteStrokeWidth={true} />
 		</button>
@@ -97,9 +101,9 @@
 	}
 
 	#left {
-		gap: 0.4rem;
 		flex-direction: column;
-		left: 0.8em;
+		gap: 0.4rem;
+		left: 0.4em;
 
 		background-color: transparent;
 		border-color: transparent;
@@ -116,6 +120,7 @@
 
 		& label {
 			display: flex;
+			justify-content: start;
 			flex-direction: column;
 
 			&:hover button,
@@ -177,7 +182,7 @@
 					&:hover,
 					&:focus {
 						height: min-content;
-						width: min-content;
+						width: 100%;
 
 						margin: 0px;
 					}
@@ -186,6 +191,12 @@
 		}
 
 		@media screen and (max-height: 250px) and (max-width: 450px) {
+			@media screen and (min-width: 150px) {
+				& label {
+					max-width: 35vw;
+				}
+			}
+
 			& > button {
 				display: none;
 			}
@@ -193,7 +204,7 @@
 	}
 
 	#right {
-		right: 0.8em;
+		right: 0.4em;
 
 		border-color: var(--background-tertiary);
 		background-color: var(--background-primary);
@@ -217,7 +228,7 @@
 		z-index: 2;
 
 		position: fixed;
-		bottom: 0.8em;
+		bottom: 0.4em;
 
 		margin: 0px;
 		padding: 0px;

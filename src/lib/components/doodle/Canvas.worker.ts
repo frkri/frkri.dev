@@ -63,6 +63,14 @@ addEventListener('message', async (e) => {
 			break;
 		}
 
+		case 'undoPath': {
+			if (paths.pop() === undefined) return;
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			redrawCanvas(strokeStyle, canvasLeftEdge);
+			break;
+		}
+
 		case 'resizeCanvas': {
 			const { width, height, dpr } = data;
 			canvas.width = width * dpr;

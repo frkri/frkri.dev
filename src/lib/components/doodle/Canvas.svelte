@@ -2,7 +2,6 @@
 	import { CanvasMode, type Path } from '$lib/types/doodle';
 	import { type StrokeOptions } from 'perfect-freehand';
 	import { page } from '$app/stores';
-	import CanvasWorker from './Canvas.worker?worker';
 	import {
 		CANVAS_MAX_HEIGHT,
 		CANVAS_MAX_WIDTH,
@@ -14,15 +13,17 @@
 		STORAGE_MAX_PATHS
 	} from './Canvas';
 
+	let canvas: HTMLCanvasElement;
+	let dots: HTMLDivElement;
 	let canvasLeftEdge: number = $state(0);
 	let canvasRightEdge: number = $state(0);
 
-	let canvas: HTMLCanvasElement;
-	let dots: HTMLDivElement;
-	let worker: Worker;
-
-	let { mode, color, pencilRadius }: { mode: CanvasMode; color: string; pencilRadius: number } =
-		$props();
+	let {
+		worker,
+		mode,
+		color,
+		pencilRadius
+	}: { worker: Worker; mode: CanvasMode; color: string; pencilRadius: number } = $props();
 	let previousMode = mode;
 	let strokeStyle: StrokeOptions = $derived({
 		size: pencilRadius * 2,
@@ -37,12 +38,14 @@
 		}
 	});
 
+	let isSetup = false;
 	$effect(() => {
-		if (!worker) {
+		if (!isSetup) {
 			const offscreenCanvas = canvas.transferControlToOffscreen();
-			worker = setupWorker(offscreenCanvas);
-
+			setupWorker(offscreenCanvas);
 			handleResize();
+
+			isSetup = true;
 			return;
 		}
 	});
@@ -65,8 +68,8 @@
 		updateCursor(mode, pencilRadius, color);
 	});
 
-	function setupWorker(offscreenCanvas: OffscreenCanvas): Worker {
-		const worker = new CanvasWorker();
+	function setupWorker(offscreenCanvas: OffscreenCanvas) {
+		//worker = new CanvasWorker();
 		worker.onmessage = async (e) => {
 			const { type, data } = e.data;
 			switch (type) {
@@ -82,8 +85,6 @@
 		// Load the saved canvas
 		const paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
 		worker.postMessage({ type: 'updatePaths', data: { paths } });
-
-		return worker;
 	}
 
 	let resizeCanvasTimeout: number | undefined = undefined;
@@ -146,8 +147,7 @@
 		dots.style.borderRightWidth = x > canvasRightEdge ? '40px' : '0px';
 
 		// Allow movement only within the canvas bounds
-		if (x < canvasLeftEdge || x > canvasRightEdge) return;
-		if (y < 0 || y > CANVAS_MAX_HEIGHT) return;
+		if (x < canvasLeftEdge || x > canvasRightEdge || y < 0 || y > CANVAS_MAX_HEIGHT) return;
 		updateDotsGrid(x, y);
 
 		// Only draw when the primary button is pressed
