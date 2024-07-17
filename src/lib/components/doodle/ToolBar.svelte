@@ -13,11 +13,16 @@
 	let altMode = false;
 
 	function handleKeyDown(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
+		if (mode === CanvasMode.IDLE || e.altKey) return;
 
 		// Keyboard specific actions
 		if (e.key === 'Shift') {
 			handleAltMode(true);
+			return;
+		}
+
+		if (e.ctrlKey && e.key === 'z') {
+			postMessage('undoPath', { shouldRedraw: true });
 			return;
 		}
 
@@ -38,7 +43,7 @@
 	}
 
 	function handleKeyUp(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.ctrlKey) return;
+		if (mode === CanvasMode.IDLE || e.ctrlKey || e.altKey) return;
 
 		// Keyboard specific actions
 		if (e.key === 'Shift') handleAltMode(false);
@@ -58,6 +63,10 @@
 		if (!pencilRadiusInput) return;
 		pencilRadiusInput.focus();
 		pencilRadiusInput.select();
+	}
+
+	async function postMessage(type: string, data: any) {
+		worker.postMessage({ type, data });
 	}
 </script>
 
@@ -104,7 +113,7 @@
 			<button
 				class="selected"
 				title="Undo"
-				onclick={() => worker.postMessage({ type: 'undoPath' })}
+				onclick={() => postMessage('undoPath', { shouldRedraw: false })}
 			>
 				<Undo2 size="30px" absoluteStrokeWidth={true} />
 			</button>
@@ -204,7 +213,7 @@
 			}
 		}
 
-		@media screen and (max-height: 250px) and (min-width: 300px) {
+		@media screen and (max-height: 250px) {
 			flex-direction: row;
 			flex-flow: row-reverse;
 
@@ -245,7 +254,7 @@
 		@media screen and (max-height: 250px) and (max-width: 450px) {
 			@media screen and (min-width: 150px) {
 				& label {
-					max-width: 35vw;
+					max-width: 40vw;
 				}
 			}
 
@@ -309,7 +318,7 @@
 			}
 		}
 
-		@media screen and (max-width: 300px) {
+		@media screen and (min-height: 250px) and (max-width: 300px) {
 			flex-direction: column;
 		}
 	}

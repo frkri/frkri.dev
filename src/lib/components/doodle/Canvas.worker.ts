@@ -70,12 +70,29 @@ addEventListener('message', async (e) => {
 		case 'updatePaths': {
 			const { paths: localPaths } = data;
 			paths = localPaths;
+
+			scheduleSaveCanvas();
 			break;
 		}
 
 		case 'undoPath': {
+			const {
+				shouldRedraw
+			}: {
+				shouldRedraw: boolean;
+			} = data;
+
 			const path = paths.pop();
-			if (path) redrawCanvas(canvasLeftEdge, [path]);
+			if (!path) return;
+
+			if (shouldRedraw) {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				redrawCanvas(canvasLeftEdge);
+			} else {
+				redrawCanvas(canvasLeftEdge, [path]);
+			}
+
+			scheduleSaveCanvas();
 			break;
 		}
 
@@ -168,7 +185,6 @@ async function updateCanvas(x: number, y: number, pressure: number) {
 	}
 }
 
-let saveCanvasTimeout: number | undefined = undefined;
 async function handlePathEnd() {
 	if (mode === CanvasMode.DRAW && points.length > 0) {
 		// Translate the points to the canvas bounds, enabling the canvas to resized without displacing the doodle
@@ -177,6 +193,11 @@ async function handlePathEnd() {
 	}
 
 	points = [];
+	scheduleSaveCanvas();
+}
+
+let saveCanvasTimeout: number | undefined = undefined;
+async function scheduleSaveCanvas() {
 	clearInterval(saveCanvasTimeout);
 	saveCanvasTimeout = setTimeout(saveCanvas, STORAGE_SAVE_TIMEOUT) as unknown as number;
 }
