@@ -18,7 +18,11 @@
 <div>
 	<menu>
 		{#if download}
-			<a title="Download {title}" href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`} download={title}>
+			<a
+				title="Download {title}"
+				href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`}
+				download={title}
+			>
 				{title}
 			</a>
 		{:else}
