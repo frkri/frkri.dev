@@ -5,8 +5,8 @@
 	const outgoing = href.startsWith('http');
 </script>
 
-<a {href} target={outgoing ? '_blank' : '_self'} {rel}
-	>{name}
+<a {href} target={outgoing ? '_blank' : '_self'} {rel}>
+	{name}
 	<div id="icon">
 		{#if outgoing}
 			<ExternalLink size="1em" />
