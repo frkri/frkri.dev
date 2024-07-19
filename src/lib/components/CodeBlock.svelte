@@ -18,13 +18,13 @@
 <div>
 	<menu>
 		{#if download}
-			<a href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`} download={title}>
+			<a title="Download {title}" href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`} download={title}>
 				{title}
 			</a>
 		{:else}
 			<span>{title}</span>
 		{/if}
-		<button onclick={() => navigator.clipboard.writeText(content)}>
+		<button title="Copy to clipboard" onclick={() => navigator.clipboard.writeText(content)}>
 			<Copy size="1.5ch" />
 		</button>
 	</menu>
@@ -46,7 +46,7 @@
 		align-items: center;
 
 		margin: 0px;
-		padding: 0.2rem;
+		padding: 0.4rem;
 
 		& * {
 			padding: 0.3rem;
