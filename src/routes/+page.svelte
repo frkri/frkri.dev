@@ -4,7 +4,7 @@
 </script>
 
 <header>
-	<h1>
+	<h1 title="Hello Internet!">
 		<HelloHeader />
 	</h1>
 	<p>I'm Frkri, a software developer who makes some stuff online</p>
@@ -47,12 +47,12 @@
 	header {
 		margin-bottom: 4em;
 
-		h1 {
+		& h1 {
 			max-width: 20em;
 			margin: 0.5rem auto;
 		}
 
-		p {
+		& p {
 			font-size: 1.2em;
 			text-align: center;
 			max-width: 30em;
@@ -63,16 +63,16 @@
 	section {
 		margin-bottom: 3rem;
 
-		h2 {
+		& h2 {
 			font-size: 1.6rem;
 			margin-bottom: 1.2rem;
 		}
 
-		ul {
+		& ul {
 			list-style-type: none;
 			padding: 0px 1.2rem;
 
-			li {
+			& li {
 				margin: 0.4rem 0px;
 			}
 		}
