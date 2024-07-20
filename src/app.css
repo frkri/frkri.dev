@@ -17,11 +17,15 @@
 @font-face {
 	font-family: 'Geist';
 	font-display: swap;
-	src: local('Geist'), url(/font/Geist.woff2) format('woff2');
+	src:
+		local('Geist'),
+		url(/font/Geist.woff2) format('woff2');
 }
 
 @font-face {
 	font-family: 'JetBrains Mono';
 	font-display: swap;
-	src: local('JetBrains Mono'), url(/font/JetBrainsMono.woff2) format('woff2');
+	src:
+		local('JetBrains Mono'),
+		url(/font/JetBrainsMono.woff2) format('woff2');
 }
