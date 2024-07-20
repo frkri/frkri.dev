@@ -9,7 +9,7 @@
 	}: {
 		children: Snippet;
 		title?: string;
-		isOpen: boolean;
+		isOpen?: boolean;
 	} = $props();
 	let dialog: HTMLDialogElement;
 
@@ -19,7 +19,7 @@
 	});
 
 	function handleClickOutside(event: MouseEvent) {
-		if (event.target !== dialog && !dialog.open) return;
+		if (!isOpen || event.target !== dialog) return;
 
 		const rect = dialog.getBoundingClientRect();
 		if (
@@ -34,11 +34,11 @@
 
 <svelte:window onclick={handleClickOutside} />
 <dialog bind:this={dialog}>
+	<button title="Close" aria-label="close" onclick={() => (isOpen = false)}>
+		<X size="15px" color="var(--text-primary)" />
+	</button>
 	<header>
 		<h2>{title}</h2>
-		<button title="Close" onclick={() => (isOpen = false)}>
-			<X size="30px" color="var(--text-primary)" />
-		</button>
 	</header>
 	<div>
 		{@render children()}
@@ -47,12 +47,13 @@
 
 <style>
 	dialog {
+		position: relative;
 		width: 90vw;
-		max-width: 500px;
-		padding: 0.8rem;
+		max-width: 700px;
+		padding: 1.4rem;
 
 		border: none;
-		border-radius: 0.5rem;
+		border-radius: 0.8rem;
 
 		background-color: var(--background-secondary);
 		animation: slideOut 150ms ease-out;
@@ -61,44 +62,49 @@
 			animation: slideIn 150ms ease-out;
 		}
 
+		& > button {
+			position: absolute;
+			top: 7px;
+			right: 7px;
+
+			width: calc(15px + 0.2rem);
+			height: calc(15px + 0.2rem);
+			padding: 0.1rem;
+
+			border: none;
+			border-radius: 0.2rem;
+
+			opacity: 60%;
+			background: none;
+			cursor: pointer;
+
+			transition: 150ms ease-in-out;
+
+			&:hover,
+			&:focus {
+				background-color: var(--background-tertiary);
+				opacity: 100%;
+			}
+		}
+
 		& > header {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-between;
 			align-items: center;
 
-			position: relative;
-			margin-bottom: 0.5rem;
+			margin: 0px;
 
 			color: var(--text-primary);
 
 			& h2 {
 				flex-grow: 1;
-				margin: 0;
+				margin: 0px;
+				text-align: justify;
+				line-height: 1.2;
 
-				font-size: 1.5rem;
+				font-size: 1rem;
 				font-weight: 600;
-			}
-
-			& button {
-				position: absolute;
-				top: 0;
-				right: 0;
-
-				width: calc(30px + 0.2rem);
-				height: calc(30px + 0.2rem);
-				padding: 0.1rem;
-
-				border: none;
-				border-radius: 0.5rem;
-
-				background: none;
-				cursor: pointer;
-
-				&:hover,
-				&:focus {
-					background-color: var(--background-tertiary);
-				}
 			}
 		}
 
