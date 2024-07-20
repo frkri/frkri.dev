@@ -2,6 +2,8 @@
 	import { PENCIL_MAX_RADIUS, PENCIL_MIN_RADIUS, PENCIL_DEFAULT_RADIUS } from './Canvas';
 	import { Eraser, Pencil, X, CircleHelp, Undo2, ChevronUp } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
+	import Dialog from '$lib/components/Dialog.svelte';
+	import LinkButton from '../LinkButton.svelte';
 
 	let {
 		worker,
@@ -9,11 +11,13 @@
 		color = $bindable(),
 		pencilRadius = $bindable()
 	}: { worker: Worker; mode: CanvasMode; color: string; pencilRadius: number } = $props();
+
 	let pencilRadiusInput: HTMLInputElement | null = $state(null);
+	let isHelpDialogOpen = $state(false);
 	let altMode = false;
 
 	function handleKeyDown(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.altKey) return;
+		if (mode === CanvasMode.IDLE || isHelpDialogOpen || e.altKey) return;
 
 		// Keyboard specific actions
 		if (e.key === 'Shift') {
@@ -22,7 +26,7 @@
 		}
 
 		if (e.ctrlKey && e.key === 'z') {
-			postMessage('undoPath', { shouldRedraw: true });
+			worker.postMessage({ type: 'undoPath', data: { shouldRedraw: true } });
 			return;
 		}
 
@@ -43,7 +47,7 @@
 	}
 
 	function handleKeyUp(e: KeyboardEvent) {
-		if (mode === CanvasMode.IDLE || e.ctrlKey || e.altKey) return;
+		if (mode === CanvasMode.IDLE || isHelpDialogOpen || e.ctrlKey || e.altKey) return;
 
 		// Keyboard specific actions
 		if (e.key === 'Shift') handleAltMode(false);
@@ -63,10 +67,6 @@
 		if (!pencilRadiusInput) return;
 		pencilRadiusInput.focus();
 		pencilRadiusInput.select();
-	}
-
-	async function postMessage(type: string, data: any) {
-		worker.postMessage({ type, data });
 	}
 </script>
 
@@ -92,7 +92,7 @@
 				{pencilRadius}
 			</button>
 		</label>
-		<button title="Help">
+		<button title="Help" onclick={() => (isHelpDialogOpen = true)}>
 			<CircleHelp size="30px" absoluteStrokeWidth={true} />
 		</button>
 	</menu>
@@ -113,7 +113,7 @@
 			<button
 				class="selected"
 				title="Undo"
-				onclick={() => postMessage('undoPath', { shouldRedraw: false })}
+				onclick={() => worker.postMessage({ type: 'undoPath', data: { shouldRedraw: false } })}
 			>
 				<Undo2 size="30px" absoluteStrokeWidth={true} />
 			</button>
@@ -127,6 +127,39 @@
 		</button>
 	{/if}
 </menu>
+
+<Dialog title="Doodle Canvas" bind:isOpen={isHelpDialogOpen}>
+	<p>
+		Welcome to the doodle canvas! Here you can draw to your heart's content. Use the toolbar to
+		select your color and pencil radius. This canvas also captures pressure sensitivity if your
+		device supports it.
+	</p>
+	<p>
+		Your doodles are saved automatically in your browser's local storage, so you can come back to
+		them later. Each page has its own doodle canvas, so you can have multiple doodles saved at once.
+	</p>
+	<h3>Keyboard shortcuts</h3>
+	<ul>
+		<li>
+			<kbd>escape</kbd> Close the doodle canvas.
+		</li>
+		<li>
+			<kbd>shift</kbd> Toggle between drawing and erasing.
+		</li>
+		<li>
+			<kbd>ctrl</kbd> + <kbd>z</kbd> Undo the last action.
+		</li>
+		<li>
+			<kbd>+</kbd> Increase the pencil radius.
+		</li>
+		<li>
+			<kbd>-</kbd> Decrease the pencil radius.
+		</li>
+		<li>
+			<kbd>=</kbd> Reset the pencil radius.
+		</li>
+	</ul>
+</Dialog>
 
 <style>
 	.inactive {
