@@ -3,7 +3,6 @@
 	import { Eraser, Pencil, X, CircleHelp, Undo2, ChevronUp } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
 	import Dialog from '$lib/components/Dialog.svelte';
-	import LinkButton from '../LinkButton.svelte';
 
 	let {
 		worker,
