@@ -4,12 +4,12 @@
 
 	let {
 		title = '',
-		children,
-		isOpen = $bindable(false)
+		isOpen = $bindable(false),
+		children
 	}: {
-		children: Snippet;
 		title?: string;
 		isOpen?: boolean;
+		children: Snippet;
 	} = $props();
 	let dialog: HTMLDialogElement;
 
@@ -30,9 +30,15 @@
 		)
 			isOpen = false;
 	}
+
+	// Dialog handles the escape key itself, but we need to still update our own state
+	function handleKeyDown(event: KeyboardEvent) {
+		if (!isOpen || event.key !== 'Escape') return;
+		isOpen = false;
+	}
 </script>
 
-<svelte:window onclick={handleClickOutside} />
+<svelte:window onclick={handleClickOutside} onkeydown={handleKeyDown} />
 <dialog bind:this={dialog}>
 	<button title="Close" aria-label="close" onclick={() => (isOpen = false)}>
 		<X size="15px" color="var(--text-primary)" />
@@ -47,10 +53,10 @@
 
 <style>
 	dialog {
-		position: relative;
 		width: 90vw;
 		max-width: 700px;
 		padding: 1.4rem;
+		padding-top: 0px;
 
 		border: none;
 		border-radius: 0.8rem;
@@ -58,14 +64,19 @@
 		background-color: var(--background-secondary);
 		animation: slideOut 150ms ease-out;
 
+		&::backdrop {
+			background-color: rgba(0, 0, 0, 0.4);
+		}
+
 		&[open] {
 			animation: slideIn 150ms ease-out;
 		}
 
 		& > button {
-			position: absolute;
+			position: sticky;
 			top: 7px;
 			right: 7px;
+			margin-left: calc(100% - 7px);
 
 			width: calc(15px + 0.2rem);
 			height: calc(15px + 0.2rem);
@@ -103,7 +114,7 @@
 				text-align: justify;
 				line-height: 1.2;
 
-				font-size: 1rem;
+				font-size: 1.4rem;
 				font-weight: 600;
 			}
 		}
