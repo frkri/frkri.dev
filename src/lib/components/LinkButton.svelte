@@ -7,13 +7,13 @@
 
 <a {href} target={outgoing ? '_blank' : '_self'} {rel}>
 	{name}
-	<div id="icon">
+	<span id="icon">
 		{#if outgoing}
 			<ExternalLink size="1em" />
 		{:else}
 			<ArrowRight size="1em" />
 		{/if}
-	</div>
+	</span>
 </a>
 
 <style>
