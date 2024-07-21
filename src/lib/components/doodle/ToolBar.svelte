@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { PENCIL_MAX_RADIUS, PENCIL_MIN_RADIUS, PENCIL_DEFAULT_RADIUS } from './Canvas';
+	import {
+		PENCIL_MAX_RADIUS,
+		PENCIL_MIN_RADIUS,
+		PENCIL_DEFAULT_RADIUS,
+		KEYS_UP,
+		KEYS_DOWN,
+		KEYS_LEFT,
+		KEYS_RIGHT
+	} from './Canvas';
 	import { Eraser, Pencil, X, CircleHelp, Undo2, ChevronUp } from 'lucide-svelte';
 	import { CanvasMode } from '$lib/types/doodle';
 	import Dialog from '$lib/components/Dialog.svelte';
@@ -17,20 +25,21 @@
 
 	function handleKeyDown(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || isHelpDialogOpen || e.altKey) return;
+		const key = e.key.toLowerCase();
 
 		// Keyboard specific actions
-		if (e.key === 'Shift') {
+		if (key === 'shift') {
 			handleAltMode(true);
 			return;
 		}
 
-		if (e.ctrlKey && e.key === 'z') {
+		if ((e.ctrlKey && key === 'z') || key === 'u') {
 			worker.postMessage({ type: 'undoPath', data: { shouldRedraw: true } });
 			return;
 		}
 
-		switch (e.key) {
-			case 'Escape':
+		switch (key) {
+			case 'escape':
 				mode = CanvasMode.IDLE;
 				break;
 			case '+':
@@ -47,9 +56,10 @@
 
 	function handleKeyUp(e: KeyboardEvent) {
 		if (mode === CanvasMode.IDLE || isHelpDialogOpen || e.ctrlKey || e.altKey) return;
+		const key = e.key.toLowerCase();
 
 		// Keyboard specific actions
-		if (e.key === 'Shift') handleAltMode(false);
+		if (key === 'shift') handleAltMode(false);
 	}
 
 	async function handleAltMode(isActive: boolean) {
@@ -131,13 +141,49 @@
 	<p>
 		Welcome to the doodle canvas! Here you can draw to your heart's content. Use the toolbar to
 		select your color and pencil radius. This canvas also captures pressure sensitivity if your
-		device supports it.
+		input device supports it.
 	</p>
 	<p>
 		Your doodles are saved automatically in your browser's local storage, so you can come back to
-		them later. Each page has its own doodle canvas, so you can have multiple doodles saved at once.
+		them later. Each page has its own canvas, so you can have multiple doodles saved at once.
 	</p>
-	<h3>Keyboard shortcuts</h3>
+	<h3>Keyboard support</h3>
+	<p>Move the pencil with:</p>
+	<ul>
+		<li>
+			<span>
+				{#each KEYS_UP as key, i}
+					<kbd>{key}</kbd>{i === KEYS_UP.length - 1 ? ' ' : ' or '}
+				{/each}
+				to move the pencil up.
+			</span>
+		</li>
+		<li>
+			<span>
+				{#each KEYS_DOWN as key, i}
+					<kbd>{key}</kbd>{i === KEYS_DOWN.length - 1 ? ' ' : ' or '}
+				{/each}
+				to move the pencil down.
+			</span>
+		</li>
+		<li>
+			<span>
+				{#each KEYS_LEFT as key, i}
+					<kbd>{key}</kbd>{i === KEYS_LEFT.length - 1 ? ' ' : ' or '}
+				{/each}
+				to move the pencil left.
+			</span>
+		</li>
+		<li>
+			<span>
+				{#each KEYS_RIGHT as key, i}
+					<kbd>{key}</kbd>{i === KEYS_RIGHT.length - 1 ? ' ' : ' or '}
+				{/each}
+				to move the pencil right.
+			</span>
+		</li>
+	</ul>
+	<p>Adittionally, you can use the following shortcuts:</p>
 	<ul>
 		<li>
 			<kbd>escape</kbd> Close the doodle canvas.
@@ -146,7 +192,7 @@
 			<kbd>shift</kbd> Toggle between drawing and erasing.
 		</li>
 		<li>
-			<kbd>ctrl</kbd> + <kbd>z</kbd> Undo the last action.
+			<kbd>ctrl</kbd> + <kbd>z</kbd> or <kbd>u</kbd> Undo the last action.
 		</li>
 		<li>
 			<kbd>+</kbd> Increase the pencil radius.
