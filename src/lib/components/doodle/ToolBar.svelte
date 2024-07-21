@@ -148,8 +148,10 @@
 		them later. Each page has its own canvas, so you can have multiple doodles saved at once.
 	</p>
 	<h3>Keyboard support</h3>
-	<p>Move the pencil with:</p>
 	<ul>
+		<li>
+			<kbd>space</kbd> to draw or erase. Needs to be held down while moving the pencil.
+		</li>
 		<li>
 			<span>
 				{#each KEYS_UP as key, i}
