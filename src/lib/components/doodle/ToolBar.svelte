@@ -183,7 +183,7 @@
 			</span>
 		</li>
 	</ul>
-	<p>Adittionally, you can use the following shortcuts:</p>
+	<p>Additionally, you can use the following shortcuts:</p>
 	<ul>
 		<li>
 			<kbd>escape</kbd> Close the doodle canvas.
