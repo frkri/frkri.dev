@@ -39,19 +39,18 @@
 	let dots: HTMLDivElement;
 
 	let previousMode = mode;
-	let isSetup = false;
+	let offscreenCanvas: OffscreenCanvas;
 
 	$effect(() => {
-		if (!isSetup) {
-			const offscreenCanvas = canvas.transferControlToOffscreen();
-			setupWorker(offscreenCanvas);
-			handleResize();
+		// Only setup the canvas once
+		if (offscreenCanvas) return;
 
-			keyboardCursor.style.width = `${PENCIL_MAX_RADIUS * 4}px`;
-			keyboardCursor.style.height = `${PENCIL_MAX_RADIUS * 4}px`;
+		offscreenCanvas = canvas.transferControlToOffscreen();
+		setupWorker(offscreenCanvas);
+		handleResize();
 
-			isSetup = true;
-		}
+		keyboardCursor.style.width = `${PENCIL_MAX_RADIUS * 4}px`;
+		keyboardCursor.style.height = `${PENCIL_MAX_RADIUS * 4}px`;
 	});
 
 	$effect(() => {

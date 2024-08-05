@@ -38,6 +38,7 @@
 			return;
 		}
 
+		if (e.ctrlKey) return;
 		switch (key) {
 			case 'escape':
 				mode = CanvasMode.IDLE;
@@ -139,15 +140,16 @@
 
 <Dialog title="Doodle Canvas" bind:isOpen={isHelpDialogOpen}>
 	<p>
-		Welcome to the doodle canvas! Here you can draw to your heart's content. Use the toolbar to
-		select your color and pencil radius. This canvas also captures pressure sensitivity if your
-		input device supports it.
+		Here you can draw to your heart's content. Use the toolbar to select your color and pencil
+		radius. This canvas also supports input devices that emit pressure sensitivity, meaning you can
+		draw with varying line thicknesses.
 	</p>
 	<p>
-		Your doodles are saved automatically in your browser's local storage, so you can come back to
-		them later. Each page has its own canvas, so you can have multiple doodles saved at once.
+		Your doodles are saved automatically in your browser's local storage and each page has its own
+		canvas, so you can doodle on multiple pages without losing your progress.
 	</p>
 	<h3>Keyboard support</h3>
+	<p>You can use the following keys to draw on the canvas while it has focus:</p>
 	<ul>
 		<li>
 			<kbd>space</kbd> to draw or erase. Needs to be held down while moving the pencil.
@@ -188,7 +190,7 @@
 	<p>Additionally, you can use the following shortcuts:</p>
 	<ul>
 		<li>
-			<kbd>escape</kbd> Close the doodle canvas.
+			<kbd>escape</kbd> Close the canvas.
 		</li>
 		<li>
 			<kbd>shift</kbd> Toggle between drawing and erasing.
