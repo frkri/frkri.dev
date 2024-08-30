@@ -1,7 +1,9 @@
-body {
-	font-family: 'Geist', sans-serif;
-	line-height: 1.5;
+html {
+	height: 100%;
+}
 
+body {
+	height: 100%;
 	max-width: 1500px;
 	margin: 0px auto;
 
