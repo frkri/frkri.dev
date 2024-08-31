@@ -33,8 +33,8 @@ importers:
         specifier: ^15.0.0
         version: 15.9.0
       lucide-svelte:
-        specifier: ^0.436.0
-        version: 0.436.0(svelte@5.0.0-next.242)
+        specifier: ^0.437.0
+        version: 0.437.0(svelte@5.0.0-next.242)
       perfect-freehand:
         specifier: ^1.2.2
         version: 1.2.2
@@ -1098,8 +1098,8 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
-  lucide-svelte@0.436.0:
-    resolution: {integrity: sha512-oRyTPzqudX01WWcSohl/Ob44GFqV/sw4moKQbsqtQ0EnKPjDPYh/v0wSaQ0wYljwSEaJ7zkBwY2lkgYFMX9PVg==}
+  lucide-svelte@0.437.0:
+    resolution: {integrity: sha512-5FaAhypmFL+eIK2t+Rog5ydza8Y9eVEMHlR33bXLrMZveLodRX9/XqNoIpuHxxG7NR4FT5KZZvcPN2V1+kSuIw==}
     peerDependencies:
       svelte: ^3 || ^4 || ^5.0.0-next.42
 
@@ -2554,7 +2554,7 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
-  lucide-svelte@0.436.0(svelte@5.0.0-next.242):
+  lucide-svelte@0.437.0(svelte@5.0.0-next.242):
     dependencies:
       svelte: 5.0.0-next.242
 
