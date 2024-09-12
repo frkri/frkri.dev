@@ -12,11 +12,11 @@
 		KEYS_LEFT,
 		KEYS_RIGHT,
 		KEYS_UP,
+		loadCanvas,
 		PENCIL_DEFAULT_PRESSURE,
 		PENCIL_MAX_RADIUS,
 		PENCIL_MIDDLE,
-		saveCanvas,
-		STORAGE_KEY
+		saveCanvas
 	} from './Canvas';
 
 	let {
@@ -101,8 +101,9 @@
 		worker.postMessage({ type: 'init', data: { canvas: offscreenCanvas } }, [offscreenCanvas]);
 
 		// Load the saved canvas
-		const paths = JSON.parse(localStorage.getItem(STORAGE_KEY + $page.url.pathname) || '[]');
-		worker.postMessage({ type: 'updatePaths', data: { paths } });
+		loadCanvas($page.url.pathname).then((paths) => {
+			worker.postMessage({ type: 'updatePaths', data: { paths } });
+		});
 	}
 
 	let resizeCanvasTimeout: number | undefined = undefined;

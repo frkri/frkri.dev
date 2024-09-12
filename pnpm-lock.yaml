@@ -35,6 +35,9 @@ importers:
       lucide-svelte:
         specifier: ^0.437.0
         version: 0.437.0(svelte@5.0.0-next.242)
+      lz-string:
+        specifier: ^1.5.0
+        version: 1.5.0
       perfect-freehand:
         specifier: ^1.2.2
         version: 1.2.2
@@ -1102,6 +1105,10 @@ packages:
     resolution: {integrity: sha512-5FaAhypmFL+eIK2t+Rog5ydza8Y9eVEMHlR33bXLrMZveLodRX9/XqNoIpuHxxG7NR4FT5KZZvcPN2V1+kSuIw==}
     peerDependencies:
       svelte: ^3 || ^4 || ^5.0.0-next.42
+
+  lz-string@1.5.0:
+    resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
+    hasBin: true
 
   magic-string@0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
@@ -2557,6 +2564,8 @@ snapshots:
   lucide-svelte@0.437.0(svelte@5.0.0-next.242):
     dependencies:
       svelte: 5.0.0-next.242
+
+  lz-string@1.5.0: {}
 
   magic-string@0.25.9:
     dependencies:

@@ -1,7 +1,10 @@
-import { type Path } from '$lib/types/doodle';
+import LZString from 'lz-string';
 import { getStroke, type StrokeOptions } from 'perfect-freehand';
+import { type Path } from '$lib/types/doodle';
 
 export const STORAGE_KEY = 'doodle';
+export const STORAGE_VERSION = 0;
+export const STORAGE_VERSION_DELIMITER = ';';
 export const STORAGE_MAX_PATHS = 4000;
 
 export const PENCIL_MAX_RADIUS = 30;
@@ -25,11 +28,30 @@ export const KEYS_DOWN = ['arrowdown', 's', 'j'];
 export const KEYS_LEFT = ['arrowleft', 'a', 'h'];
 export const KEYS_RIGHT = ['arrowright', 'd', 'l'];
 
-export async function saveCanvas(key: string, paths: Path[]) {
+export async function loadCanvas(suffix: string) {
+	const paths = localStorage.getItem(STORAGE_KEY + suffix);
+	if (paths == null) return [];
+	const delimiterPosition = paths.indexOf(STORAGE_VERSION_DELIMITER);
+
+	// Skip migrations if saved format doesn't contain version field
+	if (delimiterPosition === -1) return JSON.parse(paths);
+
+	const versionField = Number.parseInt(paths.slice(0, delimiterPosition));
+	console.debug('Canvas is using v' + versionField);
+	// Todo run migrations
+
+	return JSON.parse(LZString.decompressFromUTF16(paths.substring(delimiterPosition + 1)));
+}
+
+export async function saveCanvas(suffix: string, paths: Path[]) {
 	paths = paths.filter((path) => path.points.length > 0);
 	if (paths.length >= STORAGE_MAX_PATHS) paths = paths.slice(-STORAGE_MAX_PATHS);
 
-	localStorage.setItem(STORAGE_KEY + key, JSON.stringify(paths));
+	const data =
+		STORAGE_VERSION.toString() +
+		STORAGE_VERSION_DELIMITER +
+		LZString.compressToUTF16(JSON.stringify(paths));
+	localStorage.setItem(STORAGE_KEY + suffix, data);
 }
 
 // As per https://github.com/steveruizok/perfect-freehand
