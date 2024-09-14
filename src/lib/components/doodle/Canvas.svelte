@@ -101,8 +101,10 @@
 		worker.postMessage({ type: 'init', data: { canvas: offscreenCanvas } }, [offscreenCanvas]);
 
 		// Load the saved canvas
-		loadCanvas($page.url.pathname).then((paths) => {
-			worker.postMessage({ type: 'updatePaths', data: { paths } });
+		let paths = loadCanvas($page.url.pathname);
+		worker.postMessage({
+			type: 'updatePaths',
+			data: { paths }
 		});
 	}
 

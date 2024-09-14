@@ -28,7 +28,7 @@ export const KEYS_DOWN = ['arrowdown', 's', 'j'];
 export const KEYS_LEFT = ['arrowleft', 'a', 'h'];
 export const KEYS_RIGHT = ['arrowright', 'd', 'l'];
 
-export async function loadCanvas(suffix: string) {
+export function loadCanvas(suffix: string): Path[] {
 	const paths = localStorage.getItem(STORAGE_KEY + suffix);
 	if (paths == null) return [];
 	const delimiterPosition = paths.indexOf(STORAGE_VERSION_DELIMITER);
