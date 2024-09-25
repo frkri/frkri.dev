@@ -315,6 +315,7 @@
 
 		touch-action: none;
 		pointer-events: all;
+		outline: none;
 	}
 
 	#dots {
