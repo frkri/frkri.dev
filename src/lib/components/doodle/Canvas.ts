@@ -28,19 +28,26 @@ export const KEYS_DOWN = ['arrowdown', 's', 'j'];
 export const KEYS_LEFT = ['arrowleft', 'a', 'h'];
 export const KEYS_RIGHT = ['arrowright', 'd', 'l'];
 
-export function loadCanvas(suffix: string): Path[] {
-	const paths = localStorage.getItem(STORAGE_KEY + suffix);
-	if (paths == null) return [];
-	const delimiterPosition = paths.indexOf(STORAGE_VERSION_DELIMITER);
+export async function loadCanvas(suffix: string): Promise<Path[]> {
+	let paths = localStorage.getItem(STORAGE_KEY + suffix);
+	if (paths === null)
+		paths = await fetchDefaultCanvas(suffix === '/' ? 'index' : suffix.replace('/', ''));
 
 	// Skip migrations if saved format doesn't contain version field
+	const delimiterPosition = paths.indexOf(STORAGE_VERSION_DELIMITER);
 	if (delimiterPosition === -1) return JSON.parse(paths);
 
 	const versionField = Number.parseInt(paths.slice(0, delimiterPosition));
 	console.debug('Canvas is using v' + versionField);
-	// Todo run migrations
 
 	return JSON.parse(LZString.decompressFromUTF16(paths.substring(delimiterPosition + 1)));
+}
+
+async function fetchDefaultCanvas(page: string) {
+	const res = await fetch(`/doodle/${page}.canvas`);
+	if (res.ok) return res.text();
+
+	return '[]';
 }
 
 export async function saveCanvas(suffix: string, paths: Path[]) {

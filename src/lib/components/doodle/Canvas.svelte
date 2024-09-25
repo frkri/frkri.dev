@@ -101,10 +101,15 @@
 		worker.postMessage({ type: 'init', data: { canvas: offscreenCanvas } }, [offscreenCanvas]);
 
 		// Load the saved canvas
-		let paths = loadCanvas($page.url.pathname);
-		worker.postMessage({
-			type: 'updatePaths',
-			data: { paths }
+		loadCanvas($page.url.pathname).then((paths) => {
+			worker.postMessage({
+				type: 'updatePaths',
+				data: { paths }
+			});
+			worker.postMessage({
+				type: 'redrawCanvas',
+				data: { canvasLeftEdge }
+			});
 		});
 	}
 
