@@ -4,10 +4,9 @@
 </script>
 
 <header>
-	<h1 title="Hello Internet!">
-		<HelloHeader />
-	</h1>
-	<p>I'm Frkri, a software developer who makes some stuff online</p>
+	<div>
+		<img src="/other/cat.gif" alt="A cat waving hello" />
+	</div>
 </header>
 
 <section>
@@ -47,16 +46,8 @@
 	header {
 		margin-bottom: 4em;
 
-		& h1 {
-			max-width: 20em;
-			margin: 0.5rem auto;
-		}
-
-		& p {
-			font-size: 1.2em;
+		& div {
 			text-align: center;
-			max-width: 30em;
-			margin: 0px auto;
 		}
 	}
 
