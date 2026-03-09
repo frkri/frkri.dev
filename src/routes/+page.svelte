@@ -1,5 +1,4 @@
 <script lang="ts">
-	import HelloHeader from '$lib/assets/media/HelloHeader.svelte';
 	import LinkButton from '$lib/components/LinkButton.svelte';
 </script>
 
