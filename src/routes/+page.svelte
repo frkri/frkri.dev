@@ -6,6 +6,7 @@
 	<div>
 		<img src="/other/cat.gif" alt="A cat waving hello" />
 	</div>
+	hi
 </header>
 
 <section>
